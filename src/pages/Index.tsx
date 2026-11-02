@@ -1,18 +1,18 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { 
-  Search, 
-  ExternalLink, 
-  Settings as SettingsIcon, 
-  Globe, 
-  Lock, 
-  Database, 
-  ArrowRight, 
-  ArrowLeft, 
-  Plus, 
-  X, 
-  Command, 
-  Sparkles 
+import {
+  Search,
+  ExternalLink,
+  Settings as SettingsIcon,
+  Globe,
+  Lock,
+  Database,
+  ArrowRight,
+  ArrowLeft,
+  Plus,
+  X,
+  Command,
+  Sparkles,
 } from "lucide-react";
 import { loadCatalog } from "@/lib/catalog";
 import { type ServiceItem } from "@/data/catalog";
@@ -29,7 +29,8 @@ export default function Index() {
   const [tab, setTab] = useState<Tab>("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // اختصار Ctrl+K أو ⌘K للتركيز المباشر على البحث
+  const isArabic = lang === "ar";
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -37,11 +38,11 @@ export default function Index() {
         searchInputRef.current?.focus();
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // حساب أعداد الخدمات لكل تبويب
   const counts = useMemo(() => {
     return {
       all: catalog.length,
@@ -65,7 +66,9 @@ export default function Index() {
 
   const openWebSearch = () => {
     const q = query.trim();
-    if (q) window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, "_blank", "noopener,noreferrer");
+    if (q) {
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, "_blank", "noopener,noreferrer");
+    }
   };
 
   const tabLabel: Record<Tab, string> = {
@@ -77,12 +80,24 @@ export default function Index() {
 
   const DirArrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
+  const heroBadge = isArabic
+    ? "بوابة الدخول الموحدة لكافة أنظمة وخدمات العزب"
+    : "Unified access portal for all Alazab systems and services";
+
+  const searchResultsText = isArabic
+    ? `نتائج البحث عن "${query}": ${filtered.length} خدمة`
+    : `Search results for "${query}": ${filtered.length} service(s)`;
+
+  const clearFilterText = isArabic ? "إلغاء التصفية" : "Clear filter";
+  const noMatchText = isArabic
+    ? `لم نجد خدمة تطابق "${query}" داخل البوابة`
+    : `No matching service was found for "${query}" in the portal`;
+  const readyText = isArabic ? "جاهز" : "Ready";
+
   return (
     <div className="min-h-screen flex flex-col relative selection:bg-primary/30">
-      {/* Header مع هالة خفيفة */}
       <header className="sticky top-0 z-30 glass-header transition-all">
         <div className="section-container flex items-center gap-3 h-16">
-          {/* الشعار */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="Alazab Cloud">
             <span className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               A
@@ -92,7 +107,6 @@ export default function Index() {
             </span>
           </Link>
 
-          {/* حقل البحث المتطور */}
           <div className="flex-1 min-w-0 relative">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors peer-focus:text-primary pointer-events-none" />
             <input
@@ -107,7 +121,8 @@ export default function Index() {
               <button
                 onClick={() => setQuery("")}
                 className="absolute end-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-                title="مسح"
+                title={isArabic ? "مسح" : "Clear"}
+                aria-label={isArabic ? "مسح البحث" : "Clear search"}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -118,7 +133,6 @@ export default function Index() {
             )}
           </div>
 
-          {/* تغيير اللغة والإعدادات */}
           <button
             onClick={() => setLang(lang === "ar" ? "en" : "ar")}
             className="h-10 px-3 rounded-xl border border-border/80 bg-secondary/30 text-sm font-semibold hover:border-primary/60 hover:text-primary transition-all active:scale-95 shrink-0"
@@ -135,11 +149,10 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="section-container pt-12 pb-6 text-center relative">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold mb-4">
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>بوابة الدخول الموحدة لكافة أنظمة وخدمات العزب</span>
+          <span>{heroBadge}</span>
         </div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold leading-tight">
           <span className="gradient-text">{t.tagline}</span>
@@ -149,7 +162,6 @@ export default function Index() {
         </p>
       </section>
 
-      {/* Tabs مع العدادات الرقمية */}
       <nav className="section-container sticky top-16 z-20 pb-4 backdrop-blur-md pt-2">
         <div className="flex flex-wrap items-center justify-center gap-2">
           {TABS.map((tabId) => {
@@ -178,17 +190,15 @@ export default function Index() {
         </div>
       </nav>
 
-      {/* شريط معلومات البحث */}
       {query && (
         <div className="section-container mb-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>نتائج البحث عن "{query}": {filtered.length} خدمة</span>
+          <span>{searchResultsText}</span>
           <button onClick={() => setQuery("")} className="text-primary hover:underline">
-            إلغاء التصفية
+            {clearFilterText}
           </button>
         </div>
       )}
 
-      {/* شبكة الخدمات المتفاعلة */}
       <main className="section-container flex-1 pb-16">
         {filtered.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -220,7 +230,6 @@ export default function Index() {
                   </div>
                 </div>
 
-                {/* الشارات وحالة النظام */}
                 <div className="flex items-center gap-2 pt-2 border-t border-border/40">
                   {s.category === "private" && (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-medium text-primary">
@@ -237,10 +246,9 @@ export default function Index() {
                       <Globe className="w-3 h-3" /> {t.tabs.public}
                     </span>
                   )}
-                  {/* مؤشر الجاهزية الحيوي */}
                   <span className="ms-auto flex items-center gap-1 text-[10px] text-muted-foreground/70">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    جاهز
+                    {readyText}
                   </span>
                 </div>
               </a>
@@ -250,7 +258,7 @@ export default function Index() {
           <div className="text-center py-20 border border-dashed border-border/60 rounded-3xl bg-card/20">
             <Globe className="w-12 h-12 mx-auto text-muted-foreground/60" />
             <p className="mt-4 text-base font-medium">{t.noResults}</p>
-            <p className="text-xs text-muted-foreground mt-1">لم نجد خدمة تطابق "{query}" داخل البوابة</p>
+            <p className="text-xs text-muted-foreground mt-1">{noMatchText}</p>
             {query.trim() && (
               <button
                 onClick={openWebSearch}
@@ -264,7 +272,6 @@ export default function Index() {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-border/80 bg-card/30 py-8 mt-auto">
         <div className="section-container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-muted-foreground">
           <p>{t.footerRights}</p>
