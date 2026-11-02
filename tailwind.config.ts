@@ -19,8 +19,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Outfit", "system-ui", "sans-serif"],
-        display: ["Sora", "system-ui", "sans-serif"],
+        sans: ["'IBM Plex Sans Arabic'", "Outfit", "system-ui", "sans-serif"],
+        display: ["'IBM Plex Sans Arabic'", "Sora", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
