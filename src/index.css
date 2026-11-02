@@ -1,0 +1,264 @@
+@import "@fontsource/sora/400.css";
+@import "@fontsource/sora/500.css";
+@import "@fontsource/sora/600.css";
+@import "@fontsource/sora/700.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  Content Marketer Portfolio Design System
+  Theme: Electric Coral — Bold, Modern, Energetic
+  Typography: Sora (headings) + Outfit (body)
+*/
+
+@layer base {
+  :root {
+    /* Backgrounds - Warm neutrals */
+    --background: 30 25% 98%;
+    --background-alt: 30 20% 95%;
+    --foreground: 20 25% 10%;
+
+    /* Card & Popover */
+    --card: 30 30% 99%;
+    --card-foreground: 20 25% 10%;
+    --popover: 30 30% 99%;
+    --popover-foreground: 20 25% 10%;
+
+    /* Primary — Electric Coral */
+    --primary: 12 90% 62%;
+    --primary-foreground: 0 0% 100%;
+    --primary-muted: 12 80% 96%;
+    --primary-dark: 12 85% 52%;
+
+    /* Secondary — Warm Sand */
+    --secondary: 35 30% 92%;
+    --secondary-foreground: 20 25% 20%;
+
+    /* Muted */
+    --muted: 30 15% 94%;
+    --muted-foreground: 20 10% 45%;
+
+    /* Accent — Coral gradient companion */
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 12 90% 62%;
+
+    /* Border radius */
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 30 25% 97%;
+    --sidebar-foreground: 20 25% 20%;
+    --sidebar-primary: 12 90% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 30% 94%;
+    --sidebar-accent-foreground: 20 25% 15%;
+    --sidebar-border: 30 20% 88%;
+    --sidebar-ring: 12 90% 62%;
+
+    /* Custom tokens */
+    --metric-positive: 160 70% 40%;
+    --metric-negative: 0 84% 60%;
+    --metric-neutral: 20 10% 45%;
+
+    /* Gradient tokens */
+    --gradient-coral: linear-gradient(135deg, hsl(12 90% 62%) 0%, hsl(25 95% 55%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(30 25% 98%) 0%, hsl(35 30% 95%) 100%);
+    --gradient-glow: radial-gradient(ellipse at 50% 0%, hsl(12 90% 62% / 0.15) 0%, transparent 60%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: 
+      radial-gradient(ellipse at 100% 0%, hsl(12 90% 62% / 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 0% 100%, hsl(25 95% 55% / 0.03) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+@layer components {
+  /* Impact Block styles */
+  .impact-block {
+    @apply bg-primary-muted border border-primary/20 rounded-xl px-4 py-3;
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .impact-block:hover {
+    @apply border-primary/40 shadow-lg shadow-primary/10;
+    transform: translateY(-2px);
+  }
+
+  .impact-block-metric {
+    @apply text-2xl font-display font-bold text-primary;
+  }
+
+  .impact-block-label {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Section container */
+  .section-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Card hover effect - Enhanced */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30;
+    @apply hover:-translate-y-1;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(12 90% 62%) 0%, hsl(25 95% 55%) 100%);
+  }
+
+  /* Glow effect */
+  .glow {
+    box-shadow: 0 0 40px hsl(12 90% 62% / 0.2);
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20;
+  }
+
+  /* Animated underline */
+  .animated-underline {
+    @apply relative;
+  }
+
+  .animated-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary;
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .animated-underline:hover::after {
+    @apply w-full;
+  }
+
+  /* Pulse animation for CTAs */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::before {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(12 90% 62% / 0.1),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+}
+
+/* Custom keyframes */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(12 90% 62% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(12 90% 62% / 0.5);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Smooth page transitions */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.5s ease-out forwards;
+}
