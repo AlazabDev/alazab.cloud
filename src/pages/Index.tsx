@@ -1,351 +1,185 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, TrendingUp, Target, BarChart3, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Layout from "@/components/Layout";
-import ProjectCard from "@/components/ProjectCard";
-import ImpactBlock from "@/components/ImpactBlock";
-import { projects } from "@/data/projects";
-import { cn } from "@/lib/utils";
+import { Search, ExternalLink, Settings as SettingsIcon, Globe, Lock, Database, ArrowRight, ArrowLeft, Plus, X, Check } from "lucide-react";
+import { loadCatalog, saveCatalog, resetCatalog, newId } from "@/lib/catalog";
+import { STARTER_CATALOG, type ServiceItem, type ServiceCategory } from "@/data/catalog";
+import { useLang } from "@/lib/i18n";
+import ServiceIcon from "@/components/ServiceIcon";
 
-const Index = () => {
-  const services = [
-    {
-      icon: TrendingUp,
-      title: "SEO & Organic Growth",
-      description:
-        "Intent-driven content architecture that turns search into a scalable acquisition channel.",
-    },
-    {
-      icon: Target,
-      title: "Distribution Strategy",
-      description:
-        "Multi-channel content systems that reach the right audience at the right stage.",
-    },
-    {
-      icon: BarChart3,
-      title: "Funnel & Retention",
-      description:
-        "Content that converts, onboards, and retains—reducing churn and increasing LTV.",
-    },
-  ];
+const TABS = ["all", "public", "private", "frappe"] as const;
+type Tab = (typeof TABS)[number];
+
+export default function Index() {
+  const { t, lang, setLang, dir } = useLang();
+  const [catalog, setCatalog] = useState<ServiceItem[]>(() => loadCatalog());
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("all");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return catalog.filter((s) => {
+      if (tab !== "all" && s.category !== tab) return false;
+      if (!q) return true;
+      return [s.name, s.nameEn, s.description, s.descriptionEn, s.url]
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
+    });
+  }, [catalog, query, tab]);
+
+  const openWebSearch = () => {
+    const q = query.trim();
+    if (q) window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, "_blank", "noopener,noreferrer");
+  };
+
+  const tabLabel: Record<Tab, string> = {
+    all: t.tabs.all,
+    public: t.tabs.public,
+    private: t.tabs.private,
+    frappe: t.tabs.frappe,
+  };
+
+  const DirArrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
   return (
-    <Layout>
-      {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-dot-pattern bg-dot-md opacity-30" />
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-        <div
-          className="absolute bottom-20 left-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float"
-          style={{ animationDelay: "2s" }}
-        />
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-20 glass border-b border-white/10">
+        <div className="section-container flex items-center gap-3 h-16">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Alazab Cloud">
+            <span className="grid place-items-center w-9 h-9 rounded-lg bg-primary text-primary-foreground font-display font-bold text-lg">
+              A
+            </span>
+            <span className="font-display font-bold tracking-tight leading-none">
+              ALAZAB <span className="text-primary">CLOUD</span>
+            </span>
+          </Link>
 
-        <div className="section-container relative">
-          <div className="max-w-4xl">
-            {/* Badge */}
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.1s" }}
-            >
-              <Sparkles size={16} className="animate-pulse-soft" />
-              Content Strategy & Growth Marketing
-            </div>
-
-            {/* Headline */}
-            <h1
-              className="font-display text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground mb-6 opacity-0 animate-fade-in leading-[1.1]"
-              style={{ animationDelay: "0.2s" }}
-            >
-              Content is a{" "}
-              <span className="relative inline-block">
-                <span className="gradient-text">growth system</span>
-                <svg
-                  className="absolute -bottom-2 left-0 w-full"
-                  viewBox="0 0 200 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M2 8C50 2 150 2 198 8"
-                    stroke="url(#coral-gradient)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    className="animate-fade-in"
-                    style={{ animationDelay: "0.8s" }}
-                  />
-                  <defs>
-                    <linearGradient id="coral-gradient" x1="0" y1="0" x2="200" y2="0">
-                      <stop offset="0%" stopColor="hsl(12 90% 62%)" />
-                      <stop offset="100%" stopColor="hsl(25 95% 55%)" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-              .
-            </h1>
-
-            {/* Subheadline */}
-            <p
-              className="text-lg md:text-xl lg:text-2xl text-muted-foreground mb-10 max-w-2xl leading-relaxed opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.3s" }}
-            >
-              I build strategic content that compounds—driving organic traffic,
-              qualified leads, and measurable business results.{" "}
-              <span className="text-foreground font-medium">
-                No vanity metrics. No content for content's sake.
-              </span>
-            </p>
-
-            {/* CTAs */}
-            <div
-              className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.4s" }}
-            >
-              <Link
-                to="/work"
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full",
-                  "bg-gradient-coral text-white font-semibold text-lg",
-                  "shadow-lg shadow-primary/25",
-                  "transition-all duration-300 ease-out",
-                  "hover:shadow-xl hover:shadow-primary/35 hover:scale-105",
-                  "active:scale-95"
-                )}
-              >
-                View Case Studies
-                <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to="/contact"
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full",
-                  "bg-background border-2 border-border text-foreground font-semibold text-lg",
-                  "transition-all duration-300 ease-out",
-                  "hover:border-primary hover:text-primary hover:bg-primary/5"
-                )}
-              >
-                Get in Touch
-              </Link>
-            </div>
+          <div className="flex-1 min-w-0 relative">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && openWebSearch()}
+              placeholder={t.searchPlaceholder}
+              className="w-full h-10 rounded-lg bg-secondary/60 border border-border ps-9 pe-3 text-sm outline-none focus:ring-2 focus:ring-ring/60 focus:border-ring"
+            />
           </div>
 
-          {/* Aggregate Metrics */}
-          <div
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 opacity-0 animate-fade-in"
-            style={{ animationDelay: "0.5s" }}
+          <button
+            onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            className="h-10 px-3 rounded-lg border border-border text-sm font-semibold hover:border-primary/60 hover:text-primary transition-colors shrink-0"
           >
-            <ImpactBlock metric="+120%" label="Avg. Traffic Growth" size="lg" />
-            <ImpactBlock metric="+35%" label="Lead Generation" size="lg" />
-            <ImpactBlock metric="−28%" label="Churn Reduction" size="lg" variant="positive" />
-            <ImpactBlock metric="8+" label="Years Experience" size="lg" variant="neutral" />
-          </div>
+            {lang === "ar" ? "EN" : "ع"}
+          </button>
+          <Link
+            to="/settings"
+            aria-label={t.settings}
+            className="grid place-items-center w-10 h-10 rounded-lg border border-border hover:border-primary/60 hover:text-primary transition-colors shrink-0"
+          >
+            <SettingsIcon className="w-4 h-4" />
+          </Link>
         </div>
+      </header>
+
+      {/* Hero */}
+      <section className="section-container pt-12 pb-6 text-center">
+        <h1 className="text-3xl sm:text-4xl font-display font-bold">
+          <span className="gradient-text">{t.tagline}</span>
+        </h1>
+        <p className="mt-3 text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+          {t.taglineSub}
+        </p>
       </section>
 
-      {/* What I Do Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background-alt to-background" />
+      {/* Tabs */}
+      <nav className="section-container sticky top-16 z-10 pb-4">
+        <div className="flex flex-wrap justify-center gap-2">
+          {TABS.map((tabId) => (
+            <button
+              key={tabId}
+              onClick={() => setTab(tabId)}
+              className={`px-4 h-9 rounded-full text-sm font-medium border transition-colors ${
+                tab === tabId
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-primary/50"
+              }`}
+            >
+              {tabLabel[tabId]}
+            </button>
+          ))}
+        </div>
+      </nav>
 
-        <div className="section-container relative">
-          <div className="text-center mb-16">
-            <span
-              className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 opacity-0 animate-fade-in"
-            >
-              Services
-            </span>
-            <h2
-              className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.1s" }}
-            >
-              Content Strategy That{" "}
-              <span className="gradient-text">Drives Growth</span>
-            </h2>
-            <p
-              className="text-lg text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.2s" }}
-            >
-              I work with founders and marketing teams to build content systems
-              that generate predictable, measurable results.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {services.map((service, index) => (
-              <div
-                key={service.title}
-                className={cn(
-                  "group relative p-8 rounded-2xl",
-                  "bg-card border border-border/60",
-                  "transition-all duration-500 ease-out",
-                  "hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5",
-                  "hover:-translate-y-2",
-                  "opacity-0 animate-fade-in"
-                )}
-                style={{ animationDelay: `${0.3 + index * 0.1}s` }}
+      {/* Service grid */}
+      <main className="section-container flex-1 pb-16">
+        {filtered.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((s) => (
+              <a
+                key={s.id}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="card-hover group rounded-xl border border-border bg-card p-5 flex flex-col gap-3"
               >
-                {/* Hover gradient */}
-                <div
-                  className={cn(
-                    "absolute inset-0 rounded-2xl opacity-0",
-                    "bg-gradient-to-br from-primary/5 via-transparent to-accent/5",
-                    "transition-opacity duration-500",
-                    "group-hover:opacity-100"
-                  )}
-                />
-
-                <div className="relative">
-                  <div
-                    className={cn(
-                      "w-14 h-14 rounded-xl flex items-center justify-center mb-6",
-                      "bg-gradient-coral text-white",
-                      "shadow-lg shadow-primary/20",
-                      "transition-all duration-300",
-                      "group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/30"
-                    )}
-                  >
-                    <service.icon size={26} />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold mb-3 transition-colors duration-300 group-hover:text-primary">
-                    {service.title}
+                <div className="flex items-start justify-between gap-3">
+                  <span className="grid place-items-center w-11 h-11 rounded-lg bg-secondary border border-border group-hover:border-primary/50 transition-colors">
+                    <ServiceIcon icon={s.icon} className="w-5 h-5 text-primary" />
+                  </span>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-base">
+                    {lang === "en" && s.nameEn ? s.nameEn : s.name}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {service.description}
+                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                    {lang === "en" && s.descriptionEn ? s.descriptionEn : s.description}
                   </p>
                 </div>
-              </div>
+                {s.category === "private" && (
+                  <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-primary-muted px-3 py-1 text-xs font-medium text-primary">
+                    <Lock className="w-3 h-3" /> {t.badges.private}
+                  </span>
+                )}
+                {s.category === "frappe" && (
+                  <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-primary-muted px-3 py-1 text-xs font-medium text-primary">
+                    <Database className="w-3 h-3" /> {t.badges.frappe}
+                  </span>
+                )}
+              </a>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Featured Work Section */}
-      <section className="relative py-24 md:py-32">
-        <div className="section-container">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <span
-                className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 opacity-0 animate-fade-in"
+        ) : (
+          <div className="text-center py-16">
+            <Globe className="w-10 h-10 mx-auto text-muted-foreground" />
+            <p className="mt-4 text-muted-foreground">{query ? t.noResults : t.noResults}</p>
+            {query.trim() && (
+              <button
+                onClick={openWebSearch}
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground px-5 h-10 text-sm font-semibold hover:bg-primary-dark transition-colors"
               >
-                Portfolio
-              </span>
-              <h2
-                className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.1s" }}
-              >
-                Featured Work
-              </h2>
-              <p
-                className="text-lg text-muted-foreground opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.2s" }}
-              >
-                Real projects with measurable impact
-              </p>
-            </div>
-            <Link
-              to="/work"
-              className={cn(
-                "hidden md:inline-flex items-center gap-2 px-6 py-3 rounded-full",
-                "border-2 border-border text-foreground font-medium",
-                "transition-all duration-300",
-                "hover:border-primary hover:text-primary hover:bg-primary/5",
-                "opacity-0 animate-fade-in"
-              )}
-              style={{ animationDelay: "0.3s" }}
-            >
-              View All
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={project.slug}
-                slug={project.slug}
-                title={project.title}
-                category={project.category}
-                description={project.description}
-                metrics={project.metrics.slice(0, 2)}
-                className="opacity-0 animate-fade-in"
-                style={{ animationDelay: `${0.4 + index * 0.1}s` }}
-              />
-            ))}
-          </div>
-
-          <div className="mt-10 text-center md:hidden">
-            <Link
-              to="/work"
-              className={cn(
-                "inline-flex items-center gap-2 px-6 py-3 rounded-full",
-                "border-2 border-border text-foreground font-medium",
-                "transition-all duration-300",
-                "hover:border-primary hover:text-primary"
-              )}
-            >
-              View All Case Studies
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background-alt to-background-alt" />
-        <div className="absolute inset-0 bg-dot-pattern bg-dot-lg opacity-20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-coral opacity-10 blur-3xl rounded-full" />
-
-        <div className="section-container relative">
-          <div
-            className={cn(
-              "max-w-3xl mx-auto text-center p-10 md:p-16 rounded-3xl",
-              "bg-card/80 backdrop-blur-sm border border-border/50",
-              "shadow-2xl shadow-primary/5"
+                <Search className="w-4 h-4" />
+                {t.webSearchFor(query.trim())}
+              </button>
             )}
-          >
-            <span
-              className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 opacity-0 animate-fade-in"
-            >
-              Let's Work Together
-            </span>
-            <h2
-              className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.1s" }}
-            >
-              Ready to build a{" "}
-              <span className="gradient-text">content growth system</span>?
-            </h2>
-            <p
-              className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto opacity-0 animate-fade-in"
-              style={{ animationDelay: "0.2s" }}
-            >
-              Let's discuss how strategic content can drive measurable results
-              for your business.
-            </p>
-            <Link
-              to="/contact"
-              className={cn(
-                "inline-flex items-center justify-center gap-2 px-10 py-5 rounded-full",
-                "bg-gradient-coral text-white font-semibold text-lg",
-                "shadow-xl shadow-primary/30",
-                "transition-all duration-300 ease-out",
-                "hover:shadow-2xl hover:shadow-primary/40 hover:scale-105",
-                "active:scale-95",
-                "opacity-0 animate-fade-in"
-              )}
-              style={{ animationDelay: "0.3s" }}
-            >
-              Start a Conversation
-              <ArrowRight size={20} />
-            </Link>
           </div>
-        </div>
-      </section>
-    </Layout>
-  );
-};
+        )}
+      </main>
 
-export default Index;
+      {/* Footer */}
+      <footer className="border-t border-border py-8">
+        <div className="section-container flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <p>{t.footerRights}</p>
+          <p className="flex items-center gap-2">
+            <Plus className="w-3.5 h-3.5 text-primary" />
+            {t.footerNote}
+            <Link to="/settings" className="text-primary hover:underline inline-flex items-center gap-1">
+              {t.settings} <DirArrow className="w-3.5 h-3.5" />
+            </Link>
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
