@@ -87,7 +87,10 @@
     @apply bg-background text-foreground font-sans antialiased;
     background-image:
       radial-gradient(ellipse at 100% 0%, hsl(44 100% 50% / 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 0% 100%, hsl(233 85% 60% / 0.07) 0%, transparent 50%);
+      radial-gradient(ellipse at 0% 100%, hsl(233 85% 60% / 0.07) 0%, transparent 50%),
+      linear-gradient(to right, hsl(236 28% 20% / 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(236 28% 20% / 0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-attachment: fixed;
   }
 
@@ -121,6 +124,31 @@
 
   .section-container {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Alazab Interactive Card with Glow */
+  .card-glow {
+    @apply relative overflow-hidden transition-all duration-300 ease-out border border-border/80 bg-card/80 backdrop-blur-sm;
+  }
+
+  .card-glow::before {
+    content: "";
+    @apply absolute -inset-[1px] rounded-[inherit] opacity-0 transition-opacity duration-300 -z-10 pointer-events-none;
+    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(44 100% 50% / 0.25), transparent 40%);
+  }
+
+  .card-glow:hover {
+    @apply -translate-y-1 shadow-2xl border-primary/50;
+    box-shadow: 0 12px 30px -10px hsl(44 100% 50% / 0.12), 0 0 20px -5px hsl(233 85% 60% / 0.15);
+  }
+
+  .card-glow:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Glass Nav */
+  .glass-header {
+    @apply bg-background/80 backdrop-blur-xl border-b border-white/5;
   }
 }
 
