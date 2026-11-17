@@ -1,0 +1,274 @@
+# Workflows — statuses, transitions and tasks (Community Edition)
+
+OpenFilz can run the classic document workflows of a DMS — *Draft → Pending approval →
+Approved | Rejected → Archived* — natively, with no external engine (n8n, Camunda, …). A
+workflow is a small state machine attached to one document: every **status** names who has
+to act, every **transition** is a button those people see, and reaching a status can trigger
+**actions** on the document (move it to a folder, stamp metadata, notify people).
+
+Everything on this page is part of the open-source core (`openfilz-api`, AGPL-3.0). The
+engine, the designer, the monitor and *My tasks* are the same in the Enterprise Edition, which adds
+the features listed in [§8](#8-what-the-enterprise-edition-adds).
+
+---
+
+## 1. Concepts
+
+| Concept | Behaviour |
+|---|---|
+| **Workflow definition** | A named, versioned list of **statuses** (`START`, `STEP`, `END`), each with its assignees, its outgoing transitions, an optional due delay and optional *on-enter* actions. Stored as one JSON document (`spec`, see [§3](#3-the-definition-spec-json)); edited in the *Designer*. Deactivating a definition hides it from the *Start workflow* dialog without touching running instances. |
+| **Instance** | One document going through one definition. `RUNNING → COMPLETED \| CANCELLED`. The definition's spec is **snapshotted** at start, so editing a definition never breaks what is already running. A document has **at most one running instance** (`409` otherwise). |
+| **Task** | "The document *X* is in status *S* and waits for one of *these people*". Created every time an instance enters a status that has assignees; closed when one candidate picks a transition. Candidates are e-mail addresses and/or a realm role (any user holding the role sees the task). Any candidate may act — first come, first served — except on a **parallel review** status, which gives each reviewer a task of their own ([§3](#parallel-review)). |
+| **Transition** | A labelled button (`Approve`, `Reject`, `Send back`, …) that moves the instance to a target status. A transition may **require a comment** (typical for *Reject*). |
+| **Decision comment** | The optional/required note the actor leaves when taking a transition. Stored on the history entry, shown in the timeline and to the next assignee. |
+| **Actions (on enter)** | What OpenFilz does when the document reaches a status: `MOVE_TO_FOLDER`, `SET_METADATA`, `NOTIFY`. They run as the actor who took the transition (audit attribution) and **never block** the transition: a failed action is recorded in the history (`ACTION_FAILED`) and surfaced in the monitor. |
+| **Trigger folders** | Optional: a definition may name folders in which every new upload starts the workflow automatically (hot folder). Definitions with a `CHOSEN_AT_START` assignee cannot be triggered that way (nobody is there to choose). |
+| **Due date & reminders** | A status may carry `dueInDays`. The task gets a `dueAt`; the hourly sweeper mails an overdue reminder once, and the monitor / *My tasks* flag overdue tasks. |
+| **History** | Append-only trail per instance (`STARTED`, `TRANSITIONED`, `REVIEWED` (a parallel-review vote), `ACTION_APPLIED`, `ACTION_FAILED`, `REASSIGNED`, `REMINDED`, `COMPLETED`, `CANCELLED`), plus `WORKFLOW_*` entries in the tamper-evident audit log. |
+
+---
+
+## 2. Quick start
+
+```yaml
+openfilz:
+  workflows:
+    active: true                                    # OPENFILZ_WORKFLOWS_ACTIVE
+  common:
+    web-public-base-url: https://app.example.com/   # OPENFILZ_WEB_PUBLIC_BASE_URL (links in e-mails)
+spring:
+  mail:
+    host: smtp.example.com                          # SMTP_HOST … (same block as e-Sign)
+```
+
+* `openfilz.workflows.active` is the master switch, default `false`. It is read at runtime
+  (never a bean condition) so a single native image serves both kinds of deployment. When off,
+  `/api/v1/workflows/**` answers `404`, the sweeper idles and `GET /api/v1/settings` reports
+  `workflowsActive: false` so the web app hides the *Workflows* menu.
+* Without SMTP the mailer only logs (`[workflows][no-smtp] …`); the in-app *My tasks* page is
+  then the only invitation channel in CE (EE adds the notification bell).
+
+Then, in the web app: **Workflows → Designer → New workflow**, pick the *Simple approval*
+template, name the approver(s), save. Open any document → **Start workflow** → *Submit for
+approval*. The approver finds it under **Workflows → My tasks** (and in their inbox).
+
+---
+
+## 3. The definition spec (JSON)
+
+```jsonc
+{
+  "states": [
+    {
+      "key": "draft", "label": "Draft", "kind": "START", "color": "#94a3b8",
+      "assignees": { "type": "INITIATOR" },
+      "transitions": [
+        { "key": "submit", "label": "Submit for approval", "to": "pending_approval", "style": "PRIMARY" }
+      ]
+    },
+    {
+      "key": "pending_approval", "label": "Pending approval", "kind": "STEP", "color": "#f59e0b",
+      "assignees": { "type": "USERS", "emails": ["alice@example.com", "bob@example.com"] },
+      "dueInDays": 3,
+      "transitions": [
+        { "key": "approve", "label": "Approve", "to": "approved", "style": "SUCCESS" },
+        { "key": "reject",  "label": "Reject",  "to": "rejected", "style": "DANGER", "requireComment": true }
+      ]
+    },
+    {
+      "key": "approved", "label": "Approved", "kind": "END", "color": "#10b981",
+      "onEnter": [
+        { "type": "MOVE_TO_FOLDER", "folderId": "8c1e…" },
+        { "type": "SET_METADATA", "entries": { "status": "approved" } },
+        { "type": "NOTIFY", "emails": ["accounting@example.com"] }
+      ]
+    },
+    { "key": "rejected", "label": "Rejected", "kind": "END", "color": "#ef4444" }
+  ]
+}
+```
+
+| Field | Rules (checked on save) |
+|---|---|
+| `states[].key` | `^[a-z0-9_]{1,40}$`, unique. |
+| `kind` | Exactly one `START`; at least one `END`. `END` states have no assignees, no transitions and no due delay. Every state must be reachable from `START`, and every non-`END` state must reach an `END`. |
+| `assignees.type` | `INITIATOR` (the person who started the instance), `USERS` (`emails`, ≥ 1, lower-cased), `ROLE` (`role` = a realm role name, e.g. `CONTRIBUTOR`), `CHOSEN_AT_START` (`label` shown in the start dialog; the starter names the people). Absent on `START` = `INITIATOR`. |
+| `transitions[]` | `key` unique inside the state, `label` ≤ 60 chars, `to` must exist, `style` ∈ `PRIMARY \| SUCCESS \| DANGER \| NEUTRAL` (upper case, like every enum of the spec), `requireComment` default `false`. |
+| `onEnter[]` | `MOVE_TO_FOLDER {folderId}`, `SET_METADATA {entries: {k: v}}` (≤ 20 keys, keys must not start with `_`), `NOTIFY {emails}`. |
+| `dueInDays` | 1..365. |
+| `review` | Optional, `STEP` only — makes the status a **parallel review** (below): `rule` ∈ `ALL \| FIRST_REJECTION \| QUORUM`, `approveTransition` = the key of one of the status' transitions, `quorum` 1..20 for `QUORUM` (≤ the number of `emails` for `USERS`). Assignees must be `USERS` or `CHOSEN_AT_START`. Codes: `REVIEW_NOT_ON_STEP`, `REVIEW_NEEDS_PEOPLE`, `BAD_REVIEW_RULE`, `REVIEW_NO_APPROVE`, `BAD_QUORUM`, `QUORUM_TOO_HIGH`. |
+
+### Parallel review
+
+A plain status waits for **one** decision: every candidate sees the task, the first one to act
+closes it. A status with a `review` block waits for **each reviewer**: entering it creates one
+task per reviewer (their only candidate is themselves), so each one votes with one of the
+status' transitions and leaves their own comment, and everyone involved sees the others' votes.
+
+```jsonc
+{
+  "key": "in_review", "label": "In review", "kind": "STEP",
+  "assignees": { "type": "CHOSEN_AT_START", "label": "Reviewers" },
+  "review": { "rule": "ALL", "approveTransition": "approve" },
+  "transitions": [
+    { "key": "approve", "label": "Approve",         "to": "approved", "style": "SUCCESS" },
+    { "key": "changes", "label": "Request changes", "to": "draft",    "style": "NEUTRAL", "requireComment": true }
+  ]
+}
+```
+
+`approveTransition` is the approval; every other transition is a rejection of some kind. The rule
+turns the votes into the one transition the document takes:
+
+| `rule` | Designer label | Outcome |
+|---|---|---|
+| `ALL` | *Everyone reviews* | Waits for every reviewer. Unanimous approval → approve; otherwise the rejection voted. With the approval as the only transition it simply collects everyone's comments. |
+| `FIRST_REJECTION` | *First rejection decides* | The first vote that is not the approval moves the document at once; approval needs everyone. |
+| `QUORUM` | *N approvals are enough* | `quorum` approvals → approve at once; as soon as that many approvals can no longer be reached → the rejection voted. |
+
+When several kinds of rejection were voted, the one listed **first on the status** wins, so the
+designer's order decides (e.g. *Reject* above *Request changes*). Once decided, the reviews still
+open are closed as `CANCELLED`, a `TRANSITIONED` entry records the outcome (`details`: `review`,
+`approvals`, `votes`, `reviewers`; actor = the last voter) and the reviewers' comments are handed
+to whoever acts next as the previous comment. A document sent back to the same status starts a
+**new round**: earlier votes no longer count.
+
+Definitions also carry `name` (unique, ≤ 100), `description`, `active`, `triggerFolderIds` and
+the bookkeeping columns. The web *Designer* offers templates (*Simple approval*, *Review then
+archive*, *Two-step approval*, *Parallel review*) that produce this JSON — nobody has to write it by hand.
+
+---
+
+## 4. Life of an instance
+
+1. **Start** — `POST /workflows/instances {definitionId, documentId, assignments?, transitionKey?, comment?}`.
+   The document must be an active file the caller may read.
+   The spec is snapshotted, the instance enters the `START` state (a task for the initiator),
+   and if `transitionKey` names one of the `START` state's transitions it is applied at once —
+   the start dialog shows those transitions as buttons (*Start & submit for approval*).
+2. **Enter a state** — a task is created for the state's candidates (resolved from the
+   assignment: initiator, listed e-mails, role, or the starter's choice), `dueAt` is computed,
+   `onEnter` actions run, every candidate is notified by e-mail.
+   For an `END` state no task is created: the instance becomes `COMPLETED`, the initiator is
+   notified.
+3. **Act** — `POST /workflows/tasks/{id}/complete {transitionKey, comment?}`. The caller must be
+   a candidate (e-mail in the candidate list, or holding the candidate role), the task must be
+   `OPEN`, the transition must belong to the current state; a `requireComment` transition
+   without a comment is `400`. The task is closed, a `TRANSITIONED` history entry (with the
+   comment) is written, and step 2 repeats for the target state. On a parallel review the task
+   is one reviewer's vote: it is recorded (`REVIEWED`), and the document moves only once the
+   review rule decides. Two reviewers voting at the same moment are handled one after the other,
+   so the last vote always sees all the others.
+4. **Reassign** — `POST /workflows/tasks/{id}/reassign {emails}` by the initiator or a current
+   candidate (audit + `REASSIGNED`).
+5. **Cancel** — `POST /workflows/instances/{id}/cancel` by the initiator. Open tasks (all of a review round) closed as `CANCELLED`.
+6. **Sweeper** — `openfilz.workflows.sweep.cron` (hourly): open tasks past `dueAt` and not yet
+   reminded get one reminder (`REMINDED`, `remindedAt`).
+
+Auto-start: after every successful upload (`/documents/upload`, `/upload-multiple`, TUS
+finalize) OpenFilz starts the active definitions whose
+`triggerFolderIds` contain the file's parent — as the uploader. Smart filing (if on) runs
+first, so the trigger sees the final folder.
+
+---
+
+## 5. REST API — `/api/v1/workflows` (OIDC)
+
+Roles: every `GET` needs `READER` or `CONTRIBUTOR`; definition writes need `CONTRIBUTOR`
+(plus `WORKFLOW_DESIGNER` when `openfilz.workflows.require-designer-role=true`); starting,
+cancelling and reassigning need `CONTRIBUTOR`; **completing a task only needs to be a
+candidate** (`READER` is enough — an approver does not have to be a contributor).
+
+### Definitions
+| Method | Path | Notes |
+|---|---|---|
+| `GET` | `/definitions?active=&mine=` | The definitions, with `runningCount` and `canEdit`. `mine=true` = created by the caller. |
+| `POST` | `/definitions` | `{name, description?, active?, spec, triggerFolderIds?}` → `201`; `400` with the list of problems when invalid; `409` on a duplicate name. |
+| `GET` | `/definitions/{id}` | `404` for a definition the caller may not see, as for one that does not exist — likewise `PUT`, `DELETE` and starting it. |
+| `PUT` | `/definitions/{id}` | Same body; bumps `version`. Running instances keep their snapshot. |
+| `DELETE` | `/definitions/{id}` | `409` while instances are running. |
+| `POST` | `/definitions/validate` | Dry run → `{problems: [{path, code, message}]}` (the designer calls it on save). |
+
+### Instances
+| Method | Path | Notes |
+|---|---|---|
+| `POST` | `/instances` | Start (see §4). `409` when the document already has a running instance. |
+| `GET` | `/instances?documentId=&definitionId=&status=&state=&mine=&page=&size=` | Newest first; `mine=true` = started by me. |
+| `GET` | `/instances/summary` | `{running, completed, cancelled, overdue, byDefinition: [...]}` for the monitor header. |
+| `GET` | `/instances/{id}` | Instance + open task (with candidates) + full history + the snapshot spec (the diagram is drawn from it). |
+| `POST` | `/instances/{id}/cancel` | `{comment?}` |
+
+### Tasks
+| Method | Path | Notes |
+|---|---|---|
+| `GET` | `/tasks/mine` | Open tasks I can act on (e-mail or role), oldest first, with the document, the instance, the available transitions and the previous decision comment. A parallel-review task also carries `review` = the round's progress (`rule`, `quorum`, `approveTransition`, `total`, `approvals`, `votes[] {reviewer, transitionKey, comment, at}`, `pending[]`); an instance's `currentTask` during a review is the caller's own review when they have one. |
+| `GET` | `/tasks/mine/count` | `{count, overdue}` — the sidebar badge. |
+| `POST` | `/tasks/{id}/complete` | `{transitionKey, comment?}` → the updated instance. `403` not a candidate, `409` already done, `400` comment required. |
+| `POST` | `/tasks/{id}/reassign` | `{emails}` |
+
+---
+
+## 6. Security model
+
+* All endpoints need a signed-in user; the roles are listed in [§5](#5-rest-api--apiv1workflows-oidc).
+* In the Community Edition any user may start a workflow on an active file, everyone may follow an
+  instance, and only its initiator may cancel it.
+* **Task completion** is bound to the candidate list, not to the document's permissions: an
+  approver may be someone who cannot otherwise see the file.
+* **On-enter actions** (`MOVE_TO_FOLDER`, `SET_METADATA`) run as the person who made the
+  transition, so the audit log names them. A failed action is recorded in the history instead of
+  blocking the transition.
+* Assignee e-mails are compared case-insensitively to the user's e-mail.
+* Audit: `WORKFLOW_STARTED`, `WORKFLOW_TRANSITIONED`, `WORKFLOW_REVIEWED`, `WORKFLOW_COMPLETED`,
+  `WORKFLOW_CANCELLED`, `WORKFLOW_TASK_REASSIGNED`, `WORKFLOW_DEFINITION_CREATED / _UPDATED /
+  _DELETED`.
+
+---
+
+## 7. Web app
+
+* **Sidebar → Workflows** (badge = my open tasks, red when any is overdue). Page `/workflows`
+  with three tabs, deep-linkable with `?tab=` / `?task=` / `?instance=`:
+  * **My tasks** — one card per task: document (opens the file), workflow + status chip,
+    waiting since / due, the previous actor's comment, and the transition buttons right on the
+    card. A transition with `requireComment` (or the *Add a comment* link) opens a small
+    dialog. Done tasks disappear; the badge updates.
+  * **Monitor** — filters (definition, status, current state, mine), a table of instances,
+    and a side drawer with the **diagram** (statuses laid out left-to-right, the current one
+    highlighted, taken transitions in bold), the open task's candidates, the timeline, and
+    *Reassign* / *Cancel*.
+  * **Designer** — definition cards (name, statuses, running count, active switch) and the
+    editor: name / description / trigger folders on the left, one card per status (label,
+    colour, kind, assignees, due delay, transitions as chips → target picker, on-enter
+    actions), and the live diagram on the right. Validation problems are shown inline before
+    save.
+* **Start workflow** — item action on files (menu, toolbar, details panel): choose a
+  definition, name the *chosen at start* people, optional comment, then either *Start* or
+  one of the first transitions (*Start & submit for approval*).
+* **Details panel → Workflow section** — status chip, current step, who it waits for, my
+  transition buttons if I am a candidate, link to the monitor; nothing when the document has
+  no instance.
+* **Dashboard** — a *My tasks* card (count + first entries) when the feature is on.
+
+---
+
+## 8. What the Enterprise Edition adds
+
+* In-app notifications when a task is assigned, overdue, completed or cancelled.
+* Access based on document ownership and sharing; workflow definitions scoped to their author and
+  their teams.
+* Decision comments mirrored into the document's threaded comments.
+* Webhook events on every transition.
+
+---
+
+## 9. Configuration reference
+
+| Property | Env var | Default | What it does |
+|---|---|---|---|
+| `openfilz.workflows.active` | `OPENFILZ_WORKFLOWS_ACTIVE` | `false` | Master switch for the whole feature. |
+| `openfilz.workflows.require-designer-role` | `OPENFILZ_WORKFLOWS_REQUIRE_DESIGNER_ROLE` | `false` | Definition writes also need the `WORKFLOW_DESIGNER` realm role (`/OPENFILZ/WORKFLOW_DESIGNER` group in groups mode). |
+| `openfilz.workflows.web-base-url` | `OPENFILZ_WORKFLOWS_WEB_BASE_URL` | *(empty)* | Overrides `openfilz.common.web-public-base-url` for the links in workflow e-mails (`{base}workflows?task=…`). |
+| `openfilz.workflows.sweep.cron` | `OPENFILZ_WORKFLOWS_SWEEP_CRON` | `0 0 * * * ?` | Overdue reminder cadence. |
+| `openfilz.workflows.mail.from` / `from-name` | `OPENFILZ_WORKFLOWS_MAIL_FROM` / `_FROM_NAME` | `no-reply@openfilz.com` / `OpenFilz Workflows` | Sender of workflow e-mails. |
+| `openfilz.workflows.max-states` | `OPENFILZ_WORKFLOWS_MAX_STATES` | `30` | Size guard on a definition. |

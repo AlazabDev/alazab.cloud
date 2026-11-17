@@ -128,28 +128,33 @@ const LangContext = createContext<LangContextValue>({
 const LANG_KEY = "alazab-cloud-lang";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
+  // Server render and first client render both use Arabic; the saved choice is applied after mount
+  // so the HTML the server sends matches the first browser render.
+  const [lang, setLangState] = useState<Lang>("ar");
+
+  useEffect(() => {
     try {
-      const stored = localStorage.getItem(LANG_KEY);
-      return stored === "en" ? "en" : "ar";
+      if (localStorage.getItem(LANG_KEY) === "en") setLangState("en");
     } catch {
-      return "ar";
+      /* storage unavailable */
     }
-  });
+  }, []);
 
   const dir: "rtl" | "ltr" = lang === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = dir;
+  }, [lang, dir]);
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
     try {
-      localStorage.setItem(LANG_KEY, lang);
+      localStorage.setItem(LANG_KEY, l);
     } catch {
       /* storage unavailable */
     }
-  }, [lang, dir]);
-
-  const setLang = (l: Lang) => setLangState(l);
+  };
 
   return (
     <LangContext.Provider value={{ lang, setLang, t: dicts[lang], dir }}>
@@ -160,4 +165,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLang() {
   return useContext(LangContext);
+}
+
+/** Inline bilingual text: tx("عربي", "English"). Used by the file gallery screens. */
+export function useTx() {
+  const { lang } = useContext(LangContext);
+  return (arText: string, enText: string) => (lang === "ar" ? arText : enText);
 }
