@@ -136,6 +136,197 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          notes: string | null
+          phone: string
+          updated_at: string
+          user_id: string
+          whatsapp_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          notes?: string | null
+          phone: string
+          updated_at?: string
+          user_id: string
+          whatsapp_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string
+          updated_at?: string
+          user_id?: string
+          whatsapp_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          account_id: string | null
+          contact_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          status: string
+          unread_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          contact_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          contact_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daftra_invoices: {
+        Row: {
+          client_id: string | null
+          client_name: string | null
+          client_phone: string | null
+          created_at: string
+          currency: string
+          doc_number: string
+          due_date: string | null
+          final_total: number | null
+          id: string
+          issue_date: string | null
+          items_json: Json
+          kind: string
+          paid_amount: number | null
+          payment_status: string | null
+          raw_data: Json
+          status: string | null
+          subtotal: number | null
+          synced_at: string
+          tax_total: number | null
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          currency?: string
+          doc_number: string
+          due_date?: string | null
+          final_total?: number | null
+          id: string
+          issue_date?: string | null
+          items_json?: Json
+          kind?: string
+          paid_amount?: number | null
+          payment_status?: string | null
+          raw_data?: Json
+          status?: string | null
+          subtotal?: number | null
+          synced_at?: string
+          tax_total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          currency?: string
+          doc_number?: string
+          due_date?: string | null
+          final_total?: number | null
+          id?: string
+          issue_date?: string | null
+          items_json?: Json
+          kind?: string
+          paid_amount?: number | null
+          payment_status?: string | null
+          raw_data?: Json
+          status?: string | null
+          subtotal?: number | null
+          synced_at?: string
+          tax_total?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      daftra_sync_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          failed: number
+          id: string
+          processed: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          failed?: number
+          id?: string
+          processed?: number
+          source: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          failed?: number
+          id?: string
+          processed?: number
+          source?: string
+        }
+        Relationships: []
+      }
       document_versions: {
         Row: {
           checksum: string | null
@@ -318,6 +509,240 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_files: {
+        Row: {
+          account_id: string | null
+          contact_id: string | null
+          created_at: string
+          file_name: string | null
+          id: string
+          media_type: string | null
+          message_id: string | null
+          mime_type: string | null
+          size_bytes: number
+          status: string
+          storage_key: string | null
+          storage_url: string | null
+          user_id: string
+          wa_media_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          media_type?: string | null
+          message_id?: string | null
+          mime_type?: string | null
+          size_bytes?: number
+          status?: string
+          storage_key?: string | null
+          storage_url?: string | null
+          user_id: string
+          wa_media_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          media_type?: string | null
+          message_id?: string | null
+          mime_type?: string | null
+          size_bytes?: number
+          status?: string
+          storage_key?: string | null
+          storage_url?: string | null
+          user_id?: string
+          wa_media_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_files_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_files_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_files_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_templates: {
+        Row: {
+          account_id: string | null
+          category: string
+          components: Json
+          created_at: string
+          id: string
+          language: string
+          meta_template_id: string | null
+          name: string
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          category?: string
+          components?: Json
+          created_at?: string
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          account_id?: string | null
+          category?: string
+          components?: Json
+          created_at?: string
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          account_id: string | null
+          content: string | null
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          media_type: string | null
+          media_url: string | null
+          sent_by: string | null
+          status: string
+          user_id: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          sent_by?: string | null
+          status?: string
+          user_id: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          sent_by?: string | null
+          status?: string
+          user_id?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_services: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          description_en: string
+          icon: string
+          id: string
+          name: string
+          name_en: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          description_en?: string
+          icon?: string
+          id?: string
+          name: string
+          name_en?: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          description_en?: string
+          icon?: string
+          id?: string
+          name?: string
+          name_en?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -518,6 +943,79 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_account_secrets: {
+        Row: {
+          access_token: string
+          account_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_account_secrets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_accounts: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          display_phone: string | null
+          id: string
+          is_active: boolean
+          phone_number_id: string
+          updated_at: string
+          user_id: string
+          waba_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          display_phone?: string | null
+          id?: string
+          is_active?: boolean
+          phone_number_id: string
+          updated_at?: string
+          user_id: string
+          waba_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          display_phone?: string | null
+          id?: string
+          is_active?: boolean
+          phone_number_id?: string
+          updated_at?: string
+          user_id?: string
+          waba_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -549,6 +1047,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_unread: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       project_role: {

@@ -1,11 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type Lang = "ar" | "en";
 
 const ar = {
   appName: "Alazab Cloud",
   tagline: "بوابة واحدة لكل خدمات العزب",
-  taglineSub: "كل ما تقدمه العزب في مكان واحد — واضح، وسريع، ومنظم. دون تسجيل، ودون معرفة أين يستضيف كل نظام.",
+  taglineSub:
+    "كل ما تقدمه العزب في مكان واحد — واضح، وسريع، ومنظم. دون تسجيل، ودون معرفة أين يستضيف كل نظام.",
   searchPlaceholder: "ابحث في خدمات العزب أو الويب…",
   webSearch: "ابحث في الويب",
   webSearchFor: (q: string) => `ابحث في الويب عن «${q}»`,
@@ -48,7 +49,7 @@ const ar = {
   edit: "تعديل",
   remove: "حذف",
   removeConfirm: "هل تريد حذف هذه الخدمة من الدليل؟",
-  reset: "استعادة القائمة الابتدائية",
+  reset: "تحديث القائمة",
   resetConfirm: "سيتم استبدال دليلك الحالي بالقائمة الابتدائية. هل تريد المتابعة؟",
   saved: "تم حفظ الدليل",
   currentServices: "الخدمات الحالية",
@@ -59,7 +60,8 @@ const ar = {
 const en: typeof ar = {
   appName: "Alazab Cloud",
   tagline: "One Gateway. All Alazab Services.",
-  taglineSub: "Everything Alazab offers in one place — clear, fast and organized. No sign-up, and no need to know where each system lives.",
+  taglineSub:
+    "Everything Alazab offers in one place — clear, fast and organized. No sign-up, and no need to know where each system lives.",
   searchPlaceholder: "Search Alazab services or the web…",
   webSearch: "Search the web",
   webSearchFor: (q: string) => `Search the web for “${q}”`,
@@ -76,7 +78,8 @@ const en: typeof ar = {
   },
   noResults: "No matching services in the Alazab directory.",
   openService: "Open",
-  footerNote: "Services are managed from Settings — add any new site or system without redesigning the gateway.",
+  footerNote:
+    "Services are managed from Settings — add any new site or system without redesigning the gateway.",
   footerRights: "Alazab Cloud — the unified digital gateway of the Alazab group",
   notFoundTitle: "Page not found",
   notFoundBody: "This link is not part of the gateway.",
@@ -101,7 +104,7 @@ const en: typeof ar = {
   edit: "Edit",
   remove: "Delete",
   removeConfirm: "Remove this service from the directory?",
-  reset: "Restore starter directory",
+  reset: "Refresh directory",
   resetConfirm: "Your current directory will be replaced by the starter one. Continue?",
   saved: "Directory saved",
   currentServices: "Current services",
@@ -170,5 +173,5 @@ export function useLang() {
 /** Inline bilingual text: tx("عربي", "English"). Used by the file gallery screens. */
 export function useTx() {
   const { lang } = useContext(LangContext);
-  return (arText: string, enText: string) => (lang === "ar" ? arText : enText);
+  return useCallback((arText: string, enText: string) => (lang === "ar" ? arText : enText), [lang]);
 }

@@ -14,6 +14,7 @@ import {
   Command,
   Sparkles,
   FolderOpen,
+  FileText,
 } from "lucide-react";
 import { loadCatalog } from "@/lib/catalog";
 import { STARTER_CATALOG, type ServiceItem } from "@/data/catalog";
@@ -25,10 +26,10 @@ type Tab = (typeof TABS)[number];
 
 export default function Index() {
   const { t, lang, setLang, dir } = useLang();
-  // Saved directory lives in this browser; read it after mount so server and first render match.
+  // Shared directory from the database; loaded after mount so server and first render match.
   const [catalog, setCatalog] = useState<ServiceItem[]>(STARTER_CATALOG);
   useEffect(() => {
-    setCatalog(loadCatalog());
+    void loadCatalog().then(setCatalog);
   }, []);
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<Tab>("all");
@@ -72,7 +73,11 @@ export default function Index() {
   const openWebSearch = () => {
     const q = query.trim();
     if (q) {
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, "_blank", "noopener,noreferrer");
+      window.open(
+        `https://www.google.com/search?q=${encodeURIComponent(q)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
     }
   };
 
@@ -103,12 +108,17 @@ export default function Index() {
     <div className="min-h-screen flex flex-col relative selection:bg-primary/30">
       <header className="sticky top-0 z-30 glass-header transition-all">
         <div className="section-container flex items-center gap-3 h-16">
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="Alazab Cloud">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 shrink-0 group"
+            aria-label="Alazab Cloud"
+          >
             <span className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               A
             </span>
             <span className="font-display font-bold tracking-tight leading-none text-base sm:text-lg">
-              ALAZAB <span className="text-primary group-hover:text-glow transition-all">CLOUD</span>
+              ALAZAB{" "}
+              <span className="text-primary group-hover:text-glow transition-all">CLOUD</span>
             </span>
           </Link>
 
@@ -151,12 +161,23 @@ export default function Index() {
             <FolderOpen className="w-4 h-4" />
             {isArabic ? "معرض الملفات" : "Files"}
           </Link>
+
+          {/* الرابط الجديد: المستندات والفواتير (Desktop) */}
           <Link
-            to="/files"
-            aria-label={isArabic ? "معرض الملفات" : "Files"}
-            className="sm:hidden grid place-items-center w-10 h-10 rounded-xl bg-primary text-primary-foreground shrink-0"
+            to="/azdocs"
+            className="hidden sm:inline-flex items-center gap-2 h-10 px-3 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 transition-all active:scale-95 shrink-0"
           >
-            <FolderOpen className="w-4 h-4" />
+            <FileText className="w-4 h-4" />
+            {isArabic ? "المستندات والفواتير" : "Documents"}
+          </Link>
+
+          {/* الرابط في شاشات الجوال (Mobile) */}
+          <Link
+            to="/azdocs"
+            aria-label={isArabic ? "المستندات والفواتير" : "Documents"}
+            className="sm:hidden grid place-items-center w-10 h-10 rounded-xl border border-primary/30 bg-primary/10 text-primary shrink-0"
+          >
+            <FileText className="w-4 h-4" />
           </Link>
           <Link
             to="/settings"
@@ -198,7 +219,9 @@ export default function Index() {
                 <span>{tabLabel[tabId]}</span>
                 <span
                   className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
-                    active ? "bg-primary-foreground/20 text-primary-foreground font-bold" : "bg-muted/70 text-muted-foreground"
+                    active
+                      ? "bg-primary-foreground/20 text-primary-foreground font-bold"
+                      : "bg-muted/70 text-muted-foreground"
                   }`}
                 >
                   {counts[tabId]}
@@ -232,7 +255,10 @@ export default function Index() {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-3">
                     <span className="grid place-items-center w-12 h-12 rounded-xl bg-secondary/80 border border-border/80 group-hover:border-primary/60 group-hover:bg-primary/10 transition-all duration-300">
-                      <ServiceIcon icon={s.icon} className="w-5 h-5 text-primary group-hover:scale-110 transition-transform duration-300" />
+                      <ServiceIcon
+                        icon={s.icon}
+                        className="w-5 h-5 text-primary group-hover:scale-110 transition-transform duration-300"
+                      />
                     </span>
                     <div className="w-8 h-8 rounded-lg grid place-items-center bg-white/0 group-hover:bg-foreground/5 text-muted-foreground group-hover:text-primary transition-all">
                       <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -297,7 +323,10 @@ export default function Index() {
           <p className="flex items-center gap-2">
             <Plus className="w-3.5 h-3.5 text-primary" />
             {t.footerNote}
-            <Link to="/settings" className="text-primary font-medium hover:underline inline-flex items-center gap-1">
+            <Link
+              to="/settings"
+              className="text-primary font-medium hover:underline inline-flex items-center gap-1"
+            >
               {t.settings} <DirArrow className="w-3 h-3" />
             </Link>
           </p>

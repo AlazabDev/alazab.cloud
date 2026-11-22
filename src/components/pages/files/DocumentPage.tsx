@@ -60,7 +60,10 @@ export default function DocumentPage() {
       <EmptyState
         icon={<EyeOff className="w-6 h-6" />}
         title={tx("المستند غير متاح", "Document not available")}
-        body={tx("قد يكون المستند غير موجود أو ليست لديك صلاحية الاطلاع عليه.", "It may not exist, or you don't have access.")}
+        body={tx(
+          "قد يكون المستند غير موجود أو ليست لديك صلاحية الاطلاع عليه.",
+          "It may not exist, or you don't have access.",
+        )}
         action={
           <Button asChild variant="outline">
             <Link to="/files/gallery">{tx("العودة للمعرض", "Back to gallery")}</Link>
@@ -71,7 +74,6 @@ export default function DocumentPage() {
   }
   return <DocumentView key={documentId} data={data} />;
 }
-
 
 function DocumentView({ data }: { data: DocumentDetail }) {
   const { doc, versions, approvals, shares, audit, myRole } = data;
@@ -87,7 +89,10 @@ function DocumentView({ data }: { data: DocumentDetail }) {
   const [selectedId, setSelectedId] = useState<string | null>(versions[0]?.id ?? null);
   const [compareId, setCompareId] = useState<string | null>(null);
   const [dialog, setDialog] = useState<null | "version" | "approval" | "share" | "edit">(null);
-  const [decision, setDecision] = useState<{ id: string; status: Exclude<ApprovalStatus, "pending"> } | null>(null);
+  const [decision, setDecision] = useState<{
+    id: string;
+    status: Exclude<ApprovalStatus, "pending">;
+  } | null>(null);
 
   const selected = versions.find((v) => v.id === selectedId) ?? versions[0] ?? null;
   const compare = versions.find((v) => v.id === compareId) ?? null;
@@ -95,7 +100,10 @@ function DocumentView({ data }: { data: DocumentDetail }) {
   const downloadUrl = useSignedUrl(selected?.storage_path, selected?.file_name);
   const compareUrl = useSignedUrl(compare?.storage_path);
 
-  async function patchDoc(values: { client_visible?: boolean; archived_at?: string | null }, okMsg: string) {
+  async function patchDoc(
+    values: { client_visible?: boolean; archived_at?: string | null },
+    okMsg: string,
+  ) {
     const { error } = await supabase.from("documents").update(values).eq("id", doc.id);
     if (error) {
       toast.error(error.message);
@@ -106,7 +114,10 @@ function DocumentView({ data }: { data: DocumentDetail }) {
   }
 
   async function revoke(id: string) {
-    const { error } = await supabase.from("share_links").update({ revoked_at: new Date().toISOString() }).eq("id", id);
+    const { error } = await supabase
+      .from("share_links")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success(tx("تم إلغاء الرابط", "Link revoked"));
@@ -125,7 +136,11 @@ function DocumentView({ data }: { data: DocumentDetail }) {
         </Link>
         <Chevron className="w-3 h-3" />
         {project && (
-          <Link to="/files/projects/$projectId" params={{ projectId: project.id }} className="hover:text-foreground">
+          <Link
+            to="/files/projects/$projectId"
+            params={{ projectId: project.id }}
+            className="hover:text-foreground"
+          >
             {project.name}
           </Link>
         )}
@@ -139,9 +154,17 @@ function DocumentView({ data }: { data: DocumentDetail }) {
 
       {doc.archived_at && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm">
-          <span>{tx(`هذا المستند في الأرشيف منذ ${formatDate(doc.archived_at, lang)}`, `Archived on ${formatDate(doc.archived_at, lang)}`)}</span>
+          <span>
+            {tx(
+              `هذا المستند في الأرشيف منذ ${formatDate(doc.archived_at, lang)}`,
+              `Archived on ${formatDate(doc.archived_at, lang)}`,
+            )}
+          </span>
           {canEdit && (
-            <Button size="sm" onClick={() => patchDoc({ archived_at: null }, tx("تمت الاستعادة", "Restored"))}>
+            <Button
+              size="sm"
+              onClick={() => patchDoc({ archived_at: null }, tx("تمت الاستعادة", "Restored"))}
+            >
               <ArchiveRestore /> {tx("استعادة", "Restore")}
             </Button>
           )}
@@ -191,17 +214,28 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                   <Share2 /> {tx("مشاركة", "Share")}
                 </Button>
               )}
-              <Button variant="outline" size="icon" title={tx("تعديل البيانات", "Edit details")} onClick={() => setDialog("edit")}>
+              <Button
+                variant="outline"
+                size="icon"
+                title={tx("تعديل البيانات", "Edit details")}
+                onClick={() => setDialog("edit")}
+              >
                 <Pencil />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                title={doc.client_visible ? tx("إخفاء عن العميل", "Hide from client") : tx("إتاحة للعميل", "Release to client")}
+                title={
+                  doc.client_visible
+                    ? tx("إخفاء عن العميل", "Hide from client")
+                    : tx("إتاحة للعميل", "Release to client")
+                }
                 onClick={() =>
                   patchDoc(
                     { client_visible: !doc.client_visible },
-                    doc.client_visible ? tx("أصبح المستند داخليًا", "Now internal") : tx("أصبح المستند متاحًا للعميل", "Released to client"),
+                    doc.client_visible
+                      ? tx("أصبح المستند داخليًا", "Now internal")
+                      : tx("أصبح المستند متاحًا للعميل", "Released to client"),
                   )
                 }
               >
@@ -211,7 +245,12 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                 variant="outline"
                 size="icon"
                 title={tx("أرشفة", "Archive")}
-                onClick={() => patchDoc({ archived_at: new Date().toISOString() }, tx("تم نقل المستند للأرشيف", "Archived"))}
+                onClick={() =>
+                  patchDoc(
+                    { archived_at: new Date().toISOString() },
+                    tx("تم نقل المستند للأرشيف", "Archived"),
+                  )
+                }
               >
                 <Archive />
               </Button>
@@ -227,8 +266,9 @@ function DocumentView({ data }: { data: DocumentDetail }) {
             <>
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <span className="text-muted-foreground">
-                  {tx("الإصدار", "Revision")} <span className="font-mono text-foreground">{selected.revision_label}</span> · {selected.file_name} ·{" "}
-                  {formatBytes(selected.size_bytes)}
+                  {tx("الإصدار", "Revision")}{" "}
+                  <span className="font-mono text-foreground">{selected.revision_label}</span> ·{" "}
+                  {selected.file_name} · {formatBytes(selected.size_bytes)}
                 </span>
                 {versions.length > 1 && (
                   <div className="flex items-center gap-2">
@@ -248,7 +288,11 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                         ))}
                     </select>
                     {compareId && (
-                      <button onClick={() => setCompareId(null)} className="text-muted-foreground hover:text-foreground" aria-label={tx("إغلاق المقارنة", "Close compare")}>
+                      <button
+                        onClick={() => setCompareId(null)}
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={tx("إغلاق المقارنة", "Close compare")}
+                      >
                         <X className="w-4 h-4" />
                       </button>
                     )}
@@ -259,23 +303,49 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                 <div className="grid gap-3 lg:grid-cols-2">
                   <div className="space-y-1">
                     <p className="text-xs font-mono text-primary">{selected.revision_label}</p>
-                    <FilePreview fileName={selected.file_name} url={viewUrl.data ?? null} downloadUrl={downloadUrl.data ?? null} className="h-[60vh]" />
+                    <FilePreview
+                      fileName={selected.file_name}
+                      url={viewUrl.data ?? null}
+                      downloadUrl={downloadUrl.data ?? null}
+                      className="h-[60vh]"
+                    />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-mono text-muted-foreground">{compare.revision_label}</p>
-                    <FilePreview fileName={compare.file_name} url={compareUrl.data ?? null} className="h-[60vh]" />
+                    <p className="text-xs font-mono text-muted-foreground">
+                      {compare.revision_label}
+                    </p>
+                    <FilePreview
+                      fileName={compare.file_name}
+                      url={compareUrl.data ?? null}
+                      className="h-[60vh]"
+                    />
                   </div>
                 </div>
               ) : (
-                <FilePreview fileName={selected.file_name} url={viewUrl.data ?? null} downloadUrl={downloadUrl.data ?? null} className="h-[65vh]" />
+                <FilePreview
+                  fileName={selected.file_name}
+                  url={viewUrl.data ?? null}
+                  downloadUrl={downloadUrl.data ?? null}
+                  className="h-[65vh]"
+                />
               )}
-              {selected.notes && <p className="rounded-xl border border-border bg-card/50 p-3 text-sm">{selected.notes}</p>}
+              {selected.notes && (
+                <p className="rounded-xl border border-border bg-card/50 p-3 text-sm">
+                  {selected.notes}
+                </p>
+              )}
             </>
           ) : (
             <EmptyState
               icon={<Upload className="w-6 h-6" />}
               title={tx("لا يوجد ملف لهذا المستند بعد", "No file yet")}
-              action={canEdit ? <Button onClick={() => setDialog("version")}>{tx("رفع ملف", "Upload file")}</Button> : undefined}
+              action={
+                canEdit ? (
+                  <Button onClick={() => setDialog("version")}>
+                    {tx("رفع ملف", "Upload file")}
+                  </Button>
+                ) : undefined
+              }
             />
           )}
         </section>
@@ -290,7 +360,14 @@ function DocumentView({ data }: { data: DocumentDetail }) {
               <Meta k={tx("الجهة المُصدِرة", "Issuing party")} v={doc.issuing_party} />
               <Meta k={tx("تاريخ الإنشاء", "Created")} v={formatDate(doc.created_at, lang)} />
               <Meta k={tx("آخر تحديث", "Updated")} v={formatDate(doc.updated_at, lang)} />
-              {selected?.checksum && <Meta k="SHA-256" v={selected.checksum.slice(0, 16) + "…"} mono title={selected.checksum} />}
+              {selected?.checksum && (
+                <Meta
+                  k="SHA-256"
+                  v={selected.checksum.slice(0, 16) + "…"}
+                  mono
+                  title={selected.checksum}
+                />
+              )}
             </dl>
             {doc.tags.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1">
@@ -301,7 +378,9 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                 ))}
               </div>
             )}
-            {doc.description && <p className="mt-3 text-sm text-muted-foreground">{doc.description}</p>}
+            {doc.description && (
+              <p className="mt-3 text-sm text-muted-foreground">{doc.description}</p>
+            )}
           </Panel>
 
           <Panel title={tx("الإصدارات", "Revisions")} icon={<History className="w-4 h-4" />}>
@@ -311,12 +390,16 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                   <button
                     onClick={() => setSelectedId(v.id)}
                     className={`w-full text-start rounded-lg px-3 py-2 text-sm border transition-colors ${
-                      v.id === selected?.id ? "border-primary/60 bg-primary/10" : "border-transparent hover:bg-secondary/60"
+                      v.id === selected?.id
+                        ? "border-primary/60 bg-primary/10"
+                        : "border-transparent hover:bg-secondary/60"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono font-semibold">{v.revision_label}</span>
-                      <span className="text-[11px] text-muted-foreground">{formatDate(v.created_at, lang)}</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatDate(v.created_at, lang)}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{v.file_name}</p>
                   </button>
@@ -328,37 +411,66 @@ function DocumentView({ data }: { data: DocumentDetail }) {
 
           <Panel title={tx("الاعتمادات", "Approvals")} icon={<FileCheck2 className="w-4 h-4" />}>
             {approvals.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{tx("لا توجد طلبات اعتماد.", "No approval requests.")}</p>
+              <p className="text-sm text-muted-foreground">
+                {tx("لا توجد طلبات اعتماد.", "No approval requests.")}
+              </p>
             ) : (
               <ul className="space-y-3">
                 {approvals.map((a) => {
-                  const reviewer = a.reviewer as { id: string; full_name: string | null; email: string | null } | null;
-                  const version = a.version as { revision_label: string | null; version_number: number } | null;
-                  const canDecide = a.status === "pending" && (canManage || a.reviewer_id === me?.id);
+                  const reviewer = a.reviewer as {
+                    id: string;
+                    full_name: string | null;
+                    email: string | null;
+                  } | null;
+                  const version = a.version as {
+                    revision_label: string | null;
+                    version_number: number;
+                  } | null;
+                  const canDecide =
+                    a.status === "pending" && (canManage || a.reviewer_id === me?.id);
                   return (
-                    <li key={a.id} className="rounded-lg border border-border p-3 text-sm space-y-1.5">
+                    <li
+                      key={a.id}
+                      className="rounded-lg border border-border p-3 text-sm space-y-1.5"
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-xs">{version?.revision_label}</span>
                         <StatusBadge status={a.status} kind="approval" />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {tx("المراجِع", "Reviewer")}: {reviewer?.full_name || reviewer?.email || tx("مدير المشروع", "Project manager")}
+                        {tx("المراجِع", "Reviewer")}:{" "}
+                        {reviewer?.full_name ||
+                          reviewer?.email ||
+                          tx("مدير المشروع", "Project manager")}
                       </p>
                       {a.request_note && <p className="text-xs">{a.request_note}</p>}
-                      {a.decision_note && <p className="text-xs border-s-2 border-primary ps-2">{a.decision_note}</p>}
+                      {a.decision_note && (
+                        <p className="text-xs border-s-2 border-primary ps-2">{a.decision_note}</p>
+                      )}
                       <p className="text-[11px] text-muted-foreground">
                         {formatDateTime(a.created_at, lang)}
                         {a.decided_at && ` → ${formatDateTime(a.decided_at, lang)}`}
                       </p>
                       {canDecide && (
                         <div className="flex flex-wrap gap-1.5 pt-1">
-                          <Button size="sm" onClick={() => setDecision({ id: a.id, status: "approved" })}>
+                          <Button
+                            size="sm"
+                            onClick={() => setDecision({ id: a.id, status: "approved" })}
+                          >
                             <Check /> {tx("اعتماد", "Approve")}
                           </Button>
-                          <Button size="sm" variant="secondary" onClick={() => setDecision({ id: a.id, status: "changes_requested" })}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setDecision({ id: a.id, status: "changes_requested" })}
+                          >
                             <RotateCcw /> {tx("تعديلات", "Changes")}
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => setDecision({ id: a.id, status: "rejected" })}>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setDecision({ id: a.id, status: "rejected" })}
+                          >
                             <X /> {tx("رفض", "Reject")}
                           </Button>
                         </div>
@@ -379,13 +491,19 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                   {shares.map((s) => {
                     const state = shareState(s);
                     return (
-                      <li key={s.id} className="rounded-lg border border-border p-2.5 text-xs space-y-1">
+                      <li
+                        key={s.id}
+                        className="rounded-lg border border-border p-2.5 text-xs space-y-1"
+                      >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium truncate">{s.recipient || tx("بدون اسم", "Unnamed")}</span>
+                          <span className="font-medium truncate">
+                            {s.recipient || tx("بدون اسم", "Unnamed")}
+                          </span>
                           <ShareStateBadge state={state} />
                         </div>
                         <p className="text-muted-foreground">
-                          {tx("حتى", "Until")} {formatDateTime(s.expires_at, lang)} · {tx("مشاهدات", "views")}: {s.view_count}
+                          {tx("حتى", "Until")} {formatDateTime(s.expires_at, lang)} ·{" "}
+                          {tx("مشاهدات", "views")}: {s.view_count}
                         </p>
                         {state === "active" && (
                           <div className="flex gap-1.5">
@@ -393,7 +511,9 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                               size="sm"
                               variant="secondary"
                               onClick={async () => {
-                                await navigator.clipboard.writeText(`${window.location.origin}/share/${s.token}`);
+                                await navigator.clipboard.writeText(
+                                  `${window.location.origin}/share/${s.token}`,
+                                );
                                 toast.success(tx("تم النسخ", "Copied"));
                               }}
                             >
@@ -419,8 +539,12 @@ function DocumentView({ data }: { data: DocumentDetail }) {
                   <li key={e.id} className="text-xs flex gap-2">
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                     <span>
-                      <span className="font-medium">{AUDIT_LABELS[e.action]?.[lang] ?? e.action}</span>
-                      <span className="block text-muted-foreground">{formatDateTime(e.created_at, lang)}</span>
+                      <span className="font-medium">
+                        {AUDIT_LABELS[e.action]?.[lang] ?? e.action}
+                      </span>
+                      <span className="block text-muted-foreground">
+                        {formatDateTime(e.created_at, lang)}
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -432,7 +556,12 @@ function DocumentView({ data }: { data: DocumentDetail }) {
 
       {project && (
         <>
-          <NewVersionDialog open={dialog === "version"} onOpenChange={(v) => setDialog(v ? "version" : null)} projectId={project.id} documentId={doc.id} />
+          <NewVersionDialog
+            open={dialog === "version"}
+            onOpenChange={(v) => setDialog(v ? "version" : null)}
+            projectId={project.id}
+            documentId={doc.id}
+          />
           {selected && (
             <ApprovalRequestDialog
               open={dialog === "approval"}
@@ -452,15 +581,32 @@ function DocumentView({ data }: { data: DocumentDetail }) {
           />
         </>
       )}
-      <EditDocumentDialog open={dialog === "edit"} onOpenChange={(v) => setDialog(v ? "edit" : null)} doc={doc} />
+      <EditDocumentDialog
+        open={dialog === "edit"}
+        onOpenChange={(v) => setDialog(v ? "edit" : null)}
+        doc={doc}
+      />
       {decision && (
-        <DecisionDialog open={!!decision} onOpenChange={(v) => !v && setDecision(null)} approvalId={decision.id} decision={decision.status} />
+        <DecisionDialog
+          open={!!decision}
+          onOpenChange={(v) => !v && setDecision(null)}
+          approvalId={decision.id}
+          decision={decision.status}
+        />
       )}
     </div>
   );
 }
 
-function Panel({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Panel({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-2xl border border-border bg-card/60 p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold mb-3">
@@ -472,7 +618,17 @@ function Panel({ title, icon, children }: { title: string; icon?: React.ReactNod
   );
 }
 
-function Meta({ k, v, mono, title }: { k: string; v: string | null | undefined; mono?: boolean; title?: string }) {
+function Meta({
+  k,
+  v,
+  mono,
+  title,
+}: {
+  k: string;
+  v: string | null | undefined;
+  mono?: boolean;
+  title?: string;
+}) {
   return (
     <>
       <dt className="text-muted-foreground text-xs pt-0.5">{k}</dt>
@@ -486,10 +642,18 @@ function Meta({ k, v, mono, title }: { k: string; v: string | null | undefined; 
 export function ShareStateBadge({ state }: { state: "active" | "expired" | "revoked" }) {
   const tx = useTx();
   const cls =
-    state === "active" ? "bg-success/15 text-success border-success/40" : state === "expired" ? "bg-muted text-muted-foreground border-border" : "bg-destructive/15 text-destructive border-destructive/40";
+    state === "active"
+      ? "bg-success/15 text-success border-success/40"
+      : state === "expired"
+        ? "bg-muted text-muted-foreground border-border"
+        : "bg-destructive/15 text-destructive border-destructive/40";
   return (
     <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${cls}`}>
-      {state === "active" ? tx("فعّال", "Active") : state === "expired" ? tx("منتهي", "Expired") : tx("ملغى", "Revoked")}
+      {state === "active"
+        ? tx("فعّال", "Active")
+        : state === "expired"
+          ? tx("منتهي", "Expired")
+          : tx("ملغى", "Revoked")}
     </span>
   );
 }

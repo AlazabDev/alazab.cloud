@@ -273,3 +273,454 @@
   }
 }
 
+/*
+ * AZ Docs — printed A4 documents (invoice, quotation, letter, receipt).
+ * Paper is always white with Alazab navy + yellow, independent of the dark app theme.
+ */
+:root {
+  --doc-navy: oklch(0.221 0.133 265.9);
+  --doc-yellow: oklch(0.829 0.171 81);
+  --doc-paper: oklch(1 0 0);
+  --doc-panel: oklch(0.961 0 0);
+  --doc-ink: oklch(0.268 0.054 276.2);
+  --doc-muted: oklch(0.547 0.036 277.4);
+  --doc-line: oklch(0.268 0.054 276.2 / 0.85);
+  --doc-soft-line: oklch(0.929 0.009 279.7);
+  --doc-shadow: 0 20px 50px -20px oklch(0 0 0 / 0.6);
+}
+
+.az-page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  background: var(--doc-paper);
+  color: var(--doc-ink);
+  font-family: var(--font-sans);
+  font-size: 9pt;
+  line-height: 1.35;
+  box-shadow: var(--doc-shadow);
+  direction: ltr;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.az-page + .az-page {
+  margin-top: 10mm;
+}
+
+/* Top ribbon with the document code */
+.az-ribbon {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 128mm;
+  height: 7mm;
+  z-index: 2;
+}
+.az-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 1.4mm 0;
+  background: var(--doc-navy);
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%);
+}
+.az-ribbon span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96mm;
+  height: 6.5mm;
+  background: var(--doc-yellow);
+  color: var(--doc-navy);
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: 0.02em;
+  display: grid;
+  place-items: center;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  white-space: nowrap;
+}
+
+.az-watermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 125mm;
+  transform: translate(-50%, -42%);
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+.az-body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+/* Header: logo + title */
+.az-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 9mm 10mm 0 10mm;
+  height: 30mm;
+}
+.az-logo {
+  width: 50mm;
+  height: auto;
+  margin-top: 1mm;
+}
+.az-title {
+  text-align: center;
+  color: var(--doc-navy);
+}
+.az-title h1 {
+  font-size: 25pt;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin: 1mm 0 0;
+  font-family: var(--font-sans);
+}
+.az-title h1 em {
+  font-style: normal;
+  color: var(--doc-yellow);
+}
+.az-title p {
+  color: var(--doc-yellow);
+  font-weight: 700;
+  font-size: 8.5pt;
+  margin: 1.5mm 0 0;
+}
+.az-rule {
+  border: 0;
+  border-top: 0.3mm solid var(--doc-soft-line);
+  margin: 0 10mm;
+}
+
+/* Info panel */
+.az-info {
+  background: var(--doc-panel);
+  border-bottom: 1mm solid var(--doc-yellow);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10mm;
+  padding: 4mm 10mm;
+  min-height: 27mm;
+  align-content: center;
+}
+.az-info div {
+  display: flex;
+  gap: 2mm;
+  font-size: 8.5pt;
+  min-height: 5mm;
+  align-items: baseline;
+}
+.az-info b {
+  color: var(--doc-navy);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.az-info span {
+  unicode-bidi: plaintext;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Item tables */
+.az-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.az-table th {
+  background: var(--doc-navy);
+  color: var(--doc-paper);
+  font-weight: 600;
+  font-size: 8pt;
+  height: 8mm;
+  border: 0.3mm solid var(--doc-navy);
+}
+.az-table td {
+  border: 0.3mm solid var(--doc-line);
+  text-align: center;
+  vertical-align: middle;
+  padding: 1mm 1.5mm;
+  font-size: 8.5pt;
+  overflow: hidden;
+}
+.az-table td.az-item {
+  text-align: start;
+  unicode-bidi: plaintext;
+}
+.az-table td.az-item small {
+  display: block;
+  color: var(--doc-muted);
+  font-size: 7pt;
+  margin-top: 0.8mm;
+}
+.az-table td img {
+  max-width: 100%;
+  max-height: calc(100% - 2mm);
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+.az-table .az-img-cell {
+  height: 100%;
+}
+.az-tablewrap {
+  margin: 0 10mm;
+}
+
+.az-spacer {
+  height: 18mm;
+}
+.az-table td.az-item {
+  vertical-align: middle;
+}
+.az-item-in {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8mm;
+}
+.az-item-in strong {
+  font-weight: 700;
+  font-size: 8pt;
+  color: var(--doc-navy);
+  line-height: 1.35;
+}
+.az-table td.az-item .az-item-in small {
+  margin-top: 0;
+  font-size: 6.4pt;
+  line-height: 1.45;
+}
+.az-table td.az-code {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+.az-totals tr.az-final small {
+  font-size: 6.5pt;
+}
+
+/* Totals + rules */
+.az-summary {
+  display: grid;
+  grid-template-columns: 70mm 1fr;
+  gap: 6mm;
+  margin: 2.5mm 10mm 0;
+  align-items: start;
+}
+.az-totals {
+  width: 100%;
+  border-collapse: collapse;
+}
+.az-totals td {
+  border: 0.3mm solid var(--doc-line);
+  height: 7.5mm;
+  font-weight: 700;
+  color: var(--doc-navy);
+  font-size: 9pt;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+.az-totals td:first-child {
+  width: 50%;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+.az-totals tr.az-final td {
+  background: var(--doc-yellow);
+}
+.az-rules {
+  border: 0.3mm solid var(--doc-line);
+  background: var(--doc-panel);
+  padding: 2.5mm 3mm;
+  margin-top: 2.5mm;
+}
+.az-rules h3 {
+  font-size: 9pt;
+  font-weight: 600;
+  margin: 0 0 1.5mm;
+  color: var(--doc-ink);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+.az-rules ul {
+  margin: 0;
+  padding-inline-start: 5mm;
+  list-style: disc;
+}
+.az-rules li {
+  font-size: 6.6pt;
+  line-height: 1.7;
+}
+.az-amount-words {
+  margin: 1.5mm 10mm 0;
+  color: var(--doc-muted);
+  font-size: 7pt;
+  line-height: 1.5;
+  text-align: right;
+}
+.az-amount-words b {
+  color: var(--doc-navy);
+}
+.az-pay {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 2.5mm 10mm 0;
+}
+.az-pay dl {
+  margin: 0;
+  font-size: 7.6pt;
+  line-height: 1.55;
+}
+.az-pay dt {
+  display: inline;
+  font-weight: 700;
+  color: var(--doc-ink);
+}
+.az-pay dd {
+  display: inline;
+  margin: 0 0 0 1.5mm;
+}
+.az-pay dd::after {
+  content: "";
+  display: block;
+}
+.az-qr {
+  width: 23mm;
+  height: 23mm;
+  margin-inline-end: 6mm;
+}
+
+/* Footer */
+.az-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4mm;
+  padding: 0 10mm;
+}
+.az-foot .az-contacts {
+  border-top: 0.3mm solid var(--doc-soft-line);
+  display: flex;
+  justify-content: space-between;
+  padding-top: 2.5mm;
+  padding-bottom: 2mm;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-size: 8pt;
+  color: var(--doc-navy);
+}
+.az-foot .az-contacts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2mm;
+}
+.az-foot .az-contacts i {
+  display: inline-grid;
+  place-items: center;
+  width: 5mm;
+  height: 5mm;
+  border-radius: 50%;
+  border: 0.3mm solid var(--doc-yellow);
+  color: var(--doc-yellow);
+}
+.az-foot .az-contacts i svg {
+  width: 3mm;
+  height: 3mm;
+}
+.az-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4mm;
+  display: grid;
+  grid-template-columns: 48% 52%;
+}
+.az-bar::before {
+  content: "";
+  background: var(--doc-yellow);
+}
+.az-bar::after {
+  content: "";
+  background: var(--doc-navy);
+}
+
+/* Letter body */
+.az-letter {
+  padding: 8mm 14mm 0;
+  font-size: 11pt;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  unicode-bidi: plaintext;
+  text-align: start;
+  max-height: 225mm;
+  overflow: hidden;
+}
+.az-letter h2 {
+  font-size: 14pt;
+  color: var(--doc-navy);
+  margin: 0 0 4mm;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+/* Receipt */
+.az-sign {
+  display: flex;
+  justify-content: space-between;
+  margin: 9mm 12mm 0;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--doc-navy);
+  font-size: 9pt;
+}
+.az-sign div {
+  width: 55mm;
+}
+.az-sign div:last-child {
+  text-align: end;
+}
+.az-sign hr {
+  border: 0;
+  border-top: 0.4mm dashed var(--doc-muted);
+  margin-top: 9mm;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: var(--doc-paper) !important;
+    background-image: none !important;
+  }
+  .az-page {
+    box-shadow: none;
+    margin: 0 !important;
+    break-after: page;
+    page-break-after: always;
+  }
+  .az-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .az-print-root {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+}

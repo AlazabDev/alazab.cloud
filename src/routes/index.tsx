@@ -19,13 +19,17 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       {
         property: "og:description",
-        content: "بوابة موحدة للوصول إلى كافة خدمات ومواقع وأنظمة العزب في مكان واحد، بتجربة عربية/إنجليزية واضحة وسريعة.",
+        content:
+          "بوابة موحدة للوصول إلى كافة خدمات ومواقع وأنظمة العزب في مكان واحد، بتجربة عربية/إنجليزية واضحة وسريعة.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://alazab.cloud/" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
-      { name: "twitter:description", content: "بوابة موحدة للوصول إلى كافة خدمات ومواقع وأنظمة العزب في مكان واحد." },
+      {
+        name: "twitter:description",
+        content: "بوابة موحدة للوصول إلى كافة خدمات ومواقع وأنظمة العزب في مكان واحد.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://alazab.cloud/" }],
     scripts: [

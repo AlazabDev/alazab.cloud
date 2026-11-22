@@ -37,7 +37,9 @@ export const resolveShare = createServerFn({ method: "GET" })
 
     const { data: link } = await supabaseAdmin
       .from("share_links")
-      .select("id, document_id, version_id, project_id, recipient, note, allow_download, expires_at, revoked_at, view_count")
+      .select(
+        "id, document_id, version_id, project_id, recipient, note, allow_download, expires_at, revoked_at, view_count",
+      )
       .eq("token", data.token)
       .maybeSingle();
     if (!link) return { status: "not_found" };
@@ -65,7 +67,11 @@ export const resolveShare = createServerFn({ method: "GET" })
     const bucket = supabaseAdmin.storage.from("project-files");
     const { data: view } = await bucket.createSignedUrl(version.storage_path, 15 * 60);
     const download = link.allow_download
-      ? (await bucket.createSignedUrl(version.storage_path, 15 * 60, { download: version.file_name })).data
+      ? (
+          await bucket.createSignedUrl(version.storage_path, 15 * 60, {
+            download: version.file_name,
+          })
+        ).data
       : null;
     if (!view) return { status: "not_found" };
 

@@ -30,8 +30,15 @@ export const Route = createFileRoute("/_authenticated/files/gallery")({
     if (s["view"] === "list") out.view = "list";
     return out;
   },
-  head: () => privateHead("المعرض", "معرض ملفات المشروعات: عرض شبكي، تصفية، ومعاينة لكل المخططات والمستندات."),
+  head: () =>
+    privateHead(
+      "المعرض",
+      "معرض ملفات المشروعات: عرض شبكي، تصفية، ومعاينة لكل المخططات والمستندات.",
+    ),
   loader: ({ context: { queryClient } }) =>
-    Promise.all([queryClient.ensureQueryData(documentsQuery()), queryClient.ensureQueryData(projectsQuery())]),
+    Promise.all([
+      queryClient.ensureQueryData(documentsQuery()),
+      queryClient.ensureQueryData(projectsQuery()),
+    ]),
   component: GalleryPage,
 });

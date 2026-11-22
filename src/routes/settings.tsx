@@ -5,7 +5,10 @@ export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
       { title: "إعدادات البوابة | Alazab Cloud" },
-      { name: "description", content: "أضف وعدّل واحذف خدمات العزب في دليل البوابة: الاسم والرابط والأيقونة والتصنيف." },
+      {
+        name: "description",
+        content: "أضف وعدّل واحذف خدمات العزب في دليل البوابة: الاسم والرابط والأيقونة والتصنيف.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "إعدادات البوابة | Alazab Cloud" },
       { property: "og:description", content: "إدارة دليل خدمات Alazab Cloud." },

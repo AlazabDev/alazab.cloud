@@ -21,8 +21,21 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang, useTx } from "@/lib/i18n";
-import { AUDIT_LABELS, MEMBER_ROLES, PROJECT_STATUSES, formatDateTime, labelOf, type MemberRole } from "@/lib/files/constants";
-import { documentsQuery, meQuery, peopleQuery, projectAuditQuery, projectQuery } from "@/lib/files/queries";
+import {
+  AUDIT_LABELS,
+  MEMBER_ROLES,
+  PROJECT_STATUSES,
+  formatDateTime,
+  labelOf,
+  type MemberRole,
+} from "@/lib/files/constants";
+import {
+  documentsQuery,
+  meQuery,
+  peopleQuery,
+  projectAuditQuery,
+  projectQuery,
+} from "@/lib/files/queries";
 import { Button } from "@/components/ui/button";
 import DocumentsView from "@/components/files/DocumentsView";
 import UploadDialog from "@/components/files/UploadDialog";
@@ -64,7 +77,8 @@ export default function ProjectPage() {
   const descendantIds = useMemo(() => {
     if (folderId === "all" || folderId === "root") return null;
     const ids = new Set<string>([folderId]);
-    const walk = (id: string) => (childrenOf.get(id) ?? []).forEach((c) => (ids.add(c.id), walk(c.id)));
+    const walk = (id: string) =>
+      (childrenOf.get(id) ?? []).forEach((c) => (ids.add(c.id), walk(c.id)));
     walk(folderId);
     return ids;
   }, [folderId, childrenOf]);
@@ -74,7 +88,10 @@ export default function ProjectPage() {
     if (descendantIds && (!d.folder_id || !descendantIds.has(d.folder_id))) return false;
     const needle = q.trim().toLowerCase();
     if (!needle) return true;
-    return [d.title, d.doc_number, d.latest?.file_name, d.issuing_party, ...(d.tags ?? [])].join(" ").toLowerCase().includes(needle);
+    return [d.title, d.doc_number, d.latest?.file_name, d.issuing_party, ...(d.tags ?? [])]
+      .join(" ")
+      .toLowerCase()
+      .includes(needle);
   });
 
   if (!project) {
@@ -82,7 +99,10 @@ export default function ProjectPage() {
       <EmptyState
         icon={<EyeOff className="w-6 h-6" />}
         title={tx("المشروع غير متاح", "Project not available")}
-        body={tx("قد لا يكون موجودًا أو لست عضوًا فيه.", "It may not exist or you're not a member.")}
+        body={tx(
+          "قد لا يكون موجودًا أو لست عضوًا فيه.",
+          "It may not exist or you're not a member.",
+        )}
       />
     );
   }
@@ -91,7 +111,9 @@ export default function ProjectPage() {
     const name = window.prompt(tx("اسم المجلد الجديد", "New folder name"));
     if (!name?.trim()) return;
     const parent = folderId !== "all" && folderId !== "root" ? folderId : null;
-    const { error } = await supabase.from("folders").insert({ project_id: projectId, parent_id: parent, name: name.trim() });
+    const { error } = await supabase
+      .from("folders")
+      .insert({ project_id: projectId, parent_id: parent, name: name.trim() });
     if (error) toast.error(error.message);
     else await qc.invalidateQueries({ queryKey: ["files", "project", projectId] });
   }
@@ -105,7 +127,15 @@ export default function ProjectPage() {
   }
 
   async function deleteFolder(id: string) {
-    if (!window.confirm(tx("حذف المجلد ومجلداته الفرعية؟ المستندات بداخله ستنتقل لجذر المشروع.", "Delete this folder and its sub-folders? Its documents move to the project root."))) return;
+    if (
+      !window.confirm(
+        tx(
+          "حذف المجلد ومجلداته الفرعية؟ المستندات بداخله ستنتقل لجذر المشروع.",
+          "Delete this folder and its sub-folders? Its documents move to the project root.",
+        ),
+      )
+    )
+      return;
     const { error } = await supabase.from("folders").delete().eq("id", id);
     if (error) toast.error(error.message);
     else {
@@ -124,14 +154,26 @@ export default function ProjectPage() {
           style={{ paddingInlineStart: 8 + depth * 14 }}
           onClick={() => setFolderId(id)}
         >
-          {active ? <FolderOpen className="w-4 h-4 shrink-0" /> : <Folder className="w-4 h-4 shrink-0" />}
+          {active ? (
+            <FolderOpen className="w-4 h-4 shrink-0" />
+          ) : (
+            <Folder className="w-4 h-4 shrink-0" />
+          )}
           <span className="truncate flex-1">{name}</span>
           {canEdit && (
             <span className="hidden group-hover:flex items-center">
-              <button className="p-1 hover:text-primary" onClick={(e) => (e.stopPropagation(), renameFolder(id, name))} aria-label={tx("إعادة تسمية", "Rename")}>
+              <button
+                className="p-1 hover:text-primary"
+                onClick={(e) => (e.stopPropagation(), renameFolder(id, name))}
+                aria-label={tx("إعادة تسمية", "Rename")}
+              >
                 <Pencil className="w-3 h-3" />
               </button>
-              <button className="p-1 hover:text-destructive" onClick={(e) => (e.stopPropagation(), deleteFolder(id))} aria-label={tx("حذف", "Delete")}>
+              <button
+                className="p-1 hover:text-destructive"
+                onClick={(e) => (e.stopPropagation(), deleteFolder(id))}
+                aria-label={tx("حذف", "Delete")}
+              >
                 <Trash2 className="w-3 h-3" />
               </button>
             </span>
@@ -158,13 +200,18 @@ export default function ProjectPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link to="/files/projects" className="text-xs text-muted-foreground hover:text-foreground">
+          <Link
+            to="/files/projects"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
             {tx("المشروعات", "Projects")}
           </Link>
           <h1 className="text-2xl font-bold mt-1">{project.name}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             {project.code && <span className="font-mono text-primary">{project.code}</span>}
-            <span className="rounded-full border border-border px-2 py-0.5">{labelOf(PROJECT_STATUSES, project.status, lang)}</span>
+            <span className="rounded-full border border-border px-2 py-0.5">
+              {labelOf(PROJECT_STATUSES, project.status, lang)}
+            </span>
             {project.client_name && (
               <span className="inline-flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> {project.client_name}
@@ -176,7 +223,9 @@ export default function ProjectPage() {
               </span>
             )}
           </div>
-          {project.description && <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{project.description}</p>}
+          {project.description && (
+            <p className="mt-2 text-sm text-muted-foreground max-w-2xl">{project.description}</p>
+          )}
         </div>
         <div className="flex gap-2">
           {canManage && (
@@ -210,9 +259,16 @@ export default function ProjectPage() {
         <div className="grid gap-6 lg:grid-cols-[15rem_1fr]">
           <aside className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">{tx("المجلدات", "Folders")}</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                {tx("المجلدات", "Folders")}
+              </span>
               {canEdit && (
-                <button onClick={newFolder} className="p-1 text-muted-foreground hover:text-primary" aria-label={tx("مجلد جديد", "New folder")} title={tx("مجلد جديد", "New folder")}>
+                <button
+                  onClick={newFolder}
+                  className="p-1 text-muted-foreground hover:text-primary"
+                  aria-label={tx("مجلد جديد", "New folder")}
+                  title={tx("مجلد جديد", "New folder")}
+                >
                   <FolderPlus className="w-4 h-4" />
                 </button>
               )}
@@ -241,7 +297,15 @@ export default function ProjectPage() {
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-1 min-w-48">
                 <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input className={`${inputCls} ps-9`} value={q} onChange={(e) => setQ(e.target.value)} placeholder={tx("ابحث بالاسم أو رقم المستند أو الكلمات الدلالية", "Search name, number or tags")} />
+                <input
+                  className={`${inputCls} ps-9`}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={tx(
+                    "ابحث بالاسم أو رقم المستند أو الكلمات الدلالية",
+                    "Search name, number or tags",
+                  )}
+                />
               </div>
               <ViewToggle view={view} onChange={setView} />
             </div>
@@ -264,7 +328,14 @@ export default function ProjectPage() {
         </div>
       )}
 
-      {tab === "team" && <TeamPanel projectId={projectId} members={members} canManage={canManage} myId={me?.id ?? ""} />}
+      {tab === "team" && (
+        <TeamPanel
+          projectId={projectId}
+          members={members}
+          canManage={canManage}
+          myId={me?.id ?? ""}
+        />
+      )}
       {tab === "activity" && canManage && <ActivityPanel projectId={projectId} />}
 
       <UploadDialog
@@ -280,14 +351,28 @@ export default function ProjectPage() {
   );
 }
 
-export function ViewToggle({ view, onChange }: { view: "grid" | "list"; onChange: (v: "grid" | "list") => void }) {
+export function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: "grid" | "list";
+  onChange: (v: "grid" | "list") => void;
+}) {
   const tx = useTx();
   return (
     <div className="flex rounded-lg border border-border p-0.5">
-      <button onClick={() => onChange("grid")} className={`p-2 rounded-md ${view === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`} aria-label={tx("عرض شبكي", "Grid view")}>
+      <button
+        onClick={() => onChange("grid")}
+        className={`p-2 rounded-md ${view === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        aria-label={tx("عرض شبكي", "Grid view")}
+      >
         <LayoutGrid className="w-4 h-4" />
       </button>
-      <button onClick={() => onChange("list")} className={`p-2 rounded-md ${view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`} aria-label={tx("عرض قائمة", "List view")}>
+      <button
+        onClick={() => onChange("list")}
+        className={`p-2 rounded-md ${view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        aria-label={tx("عرض قائمة", "List view")}
+      >
         <List className="w-4 h-4" />
       </button>
     </div>
@@ -301,7 +386,17 @@ function TeamPanel({
   myId,
 }: {
   projectId: string;
-  members: { id: string; user_id: string; member_role: MemberRole; profile: { id: string; full_name: string | null; email: string | null; company: string | null } | null }[];
+  members: {
+    id: string;
+    user_id: string;
+    member_role: MemberRole;
+    profile: {
+      id: string;
+      full_name: string | null;
+      email: string | null;
+      company: string | null;
+    } | null;
+  }[];
   canManage: boolean;
   myId: string;
 }) {
@@ -313,13 +408,18 @@ function TeamPanel({
   const [role, setRole] = useState<MemberRole>("viewer");
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["files"] });
-  const candidates = (people ?? []).filter((p) => !members.some((m) => m.user_id === p.id) && p.roles.length > 0);
+  const candidates = (people ?? []).filter(
+    (p) => !members.some((m) => m.user_id === p.id) && p.roles.length > 0,
+  );
 
   async function add() {
     if (!userId) return;
     const person = people?.find((p) => p.id === userId);
-    const finalRole: MemberRole = person && !person.roles.some((r) => r === "admin" || r === "staff") ? "client" : role;
-    const { error } = await supabase.from("project_members").insert({ project_id: projectId, user_id: userId, member_role: finalRole });
+    const finalRole: MemberRole =
+      person && !person.roles.some((r) => r === "admin" || r === "staff") ? "client" : role;
+    const { error } = await supabase
+      .from("project_members")
+      .insert({ project_id: projectId, user_id: userId, member_role: finalRole });
     if (error) toast.error(error.message);
     else {
       setUserId("");
@@ -329,13 +429,17 @@ function TeamPanel({
   }
 
   async function changeRole(id: string, r: MemberRole) {
-    const { error } = await supabase.from("project_members").update({ member_role: r }).eq("id", id);
+    const { error } = await supabase
+      .from("project_members")
+      .update({ member_role: r })
+      .eq("id", id);
     if (error) toast.error(error.message);
     else await refresh();
   }
 
   async function remove(id: string) {
-    if (!window.confirm(tx("إزالة العضو من المشروع؟", "Remove this member from the project?"))) return;
+    if (!window.confirm(tx("إزالة العضو من المشروع؟", "Remove this member from the project?")))
+      return;
     const { error } = await supabase.from("project_members").delete().eq("id", id);
     if (error) toast.error(error.message);
     else await refresh();
@@ -347,18 +451,29 @@ function TeamPanel({
         <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border bg-card/50 p-4">
           <div className="flex-1 min-w-48">
             <span className="text-xs text-muted-foreground">{tx("إضافة عضو", "Add member")}</span>
-            <select className={`${selectCls} mt-1`} value={userId} onChange={(e) => setUserId(e.target.value)}>
+            <select
+              className={`${selectCls} mt-1`}
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            >
               <option value="">{tx("— اختر حسابًا —", "— Choose an account —")}</option>
               {candidates.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.full_name || p.email} {p.roles.includes("client") ? `(${tx("عميل", "client")})` : ""}
+                  {p.full_name || p.email}{" "}
+                  {p.roles.includes("client") ? `(${tx("عميل", "client")})` : ""}
                 </option>
               ))}
             </select>
           </div>
           <div className="w-48">
-            <span className="text-xs text-muted-foreground">{tx("الدور في المشروع", "Project role")}</span>
-            <select className={`${selectCls} mt-1`} value={role} onChange={(e) => setRole(e.target.value as MemberRole)}>
+            <span className="text-xs text-muted-foreground">
+              {tx("الدور في المشروع", "Project role")}
+            </span>
+            <select
+              className={`${selectCls} mt-1`}
+              value={role}
+              onChange={(e) => setRole(e.target.value as MemberRole)}
+            >
               {MEMBER_ROLES.map((r) => (
                 <option key={r.id} value={r.id}>
                   {lang === "ar" ? r.ar : r.en}
@@ -370,7 +485,10 @@ function TeamPanel({
             <UserPlus /> {tx("إضافة", "Add")}
           </Button>
           <p className="w-full text-[11px] text-muted-foreground">
-            {tx("حسابات العملاء تُضاف دائمًا بدور «عميل». الحسابات الجديدة تظهر هنا بعد أن يحدد مدير النظام نوعها.", "Client accounts are always added with the Client role. New accounts appear after an admin sets their type.")}
+            {tx(
+              "حسابات العملاء تُضاف دائمًا بدور «عميل». الحسابات الجديدة تظهر هنا بعد أن يحدد مدير النظام نوعها.",
+              "Client accounts are always added with the Client role. New accounts appear after an admin sets their type.",
+            )}
           </p>
         </div>
       )}
@@ -389,19 +507,29 @@ function TeamPanel({
             </div>
             {canManage && m.user_id !== myId ? (
               <>
-                <select className="h-8 rounded-md border border-input bg-background/60 px-2 text-xs" value={m.member_role} onChange={(e) => changeRole(m.id, e.target.value as MemberRole)}>
+                <select
+                  className="h-8 rounded-md border border-input bg-background/60 px-2 text-xs"
+                  value={m.member_role}
+                  onChange={(e) => changeRole(m.id, e.target.value as MemberRole)}
+                >
                   {MEMBER_ROLES.map((r) => (
                     <option key={r.id} value={r.id}>
                       {lang === "ar" ? r.ar : r.en}
                     </option>
                   ))}
                 </select>
-                <button onClick={() => remove(m.id)} className="p-1.5 text-muted-foreground hover:text-destructive" aria-label={tx("إزالة", "Remove")}>
+                <button
+                  onClick={() => remove(m.id)}
+                  className="p-1.5 text-muted-foreground hover:text-destructive"
+                  aria-label={tx("إزالة", "Remove")}
+                >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </>
             ) : (
-              <span className="text-xs text-muted-foreground">{labelOf(MEMBER_ROLES, m.member_role, lang)}</span>
+              <span className="text-xs text-muted-foreground">
+                {labelOf(MEMBER_ROLES, m.member_role, lang)}
+              </span>
             )}
           </li>
         ))}
@@ -415,26 +543,38 @@ function ActivityPanel({ projectId }: { projectId: string }) {
   const { lang } = useLang();
   const { data, isLoading } = useQuery(projectAuditQuery(projectId));
   if (isLoading) return <p className="text-sm text-muted-foreground">…</p>;
-  if (!data || data.length === 0) return <p className="text-sm text-muted-foreground">{tx("لا يوجد نشاط بعد.", "No activity yet.")}</p>;
+  if (!data || data.length === 0)
+    return (
+      <p className="text-sm text-muted-foreground">{tx("لا يوجد نشاط بعد.", "No activity yet.")}</p>
+    );
   return (
     <ol className="max-w-3xl space-y-2">
       {data.map((e) => {
         const doc = e.document as { id: string; title: string } | null;
         return (
-          <li key={e.id} className="flex items-start gap-3 rounded-lg border border-border bg-card/40 px-4 py-2.5 text-sm">
+          <li
+            key={e.id}
+            className="flex items-start gap-3 rounded-lg border border-border bg-card/40 px-4 py-2.5 text-sm"
+          >
             <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />
             <div className="min-w-0 flex-1">
               <span className="font-medium">{AUDIT_LABELS[e.action]?.[lang] ?? e.action}</span>
               {doc && (
                 <>
                   {" · "}
-                  <Link to="/files/documents/$documentId" params={{ documentId: doc.id }} className="text-primary hover:underline">
+                  <Link
+                    to="/files/documents/$documentId"
+                    params={{ documentId: doc.id }}
+                    className="text-primary hover:underline"
+                  >
                     {doc.title}
                   </Link>
                 </>
               )}
             </div>
-            <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDateTime(e.created_at, lang)}</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatDateTime(e.created_at, lang)}
+            </span>
           </li>
         );
       })}

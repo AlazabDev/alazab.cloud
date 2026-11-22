@@ -41,11 +41,22 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen grid place-items-center p-4">
       <div className="w-full max-w-md card-glow rounded-2xl p-8">
         <KeyRound className="w-9 h-9 text-primary" />
-        <h1 className="mt-3 text-xl font-bold">{tx("تعيين كلمة مرور جديدة", "Set a new password")}</h1>
+        <h1 className="mt-3 text-xl font-bold">
+          {tx("تعيين كلمة مرور جديدة", "Set a new password")}
+        </h1>
         {ready ? (
           <form onSubmit={submit} className="mt-5 space-y-4">
             <Field label={tx("كلمة المرور الجديدة", "New password")}>
-              <input required minLength={8} type="password" dir="ltr" autoComplete="new-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <input
+                required
+                minLength={8}
+                type="password"
+                dir="ltr"
+                autoComplete="new-password"
+                className={inputCls}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </Field>
             <Button type="submit" className="w-full" disabled={busy}>
               {busy && <Loader2 className="animate-spin" />}
@@ -54,7 +65,10 @@ export default function ResetPasswordPage() {
           </form>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">
-            {tx("افتح هذه الصفحة من الرابط المرسل إلى بريدك الإلكتروني.", "Open this page from the link sent to your email.")}
+            {tx(
+              "افتح هذه الصفحة من الرابط المرسل إلى بريدك الإلكتروني.",
+              "Open this page from the link sent to your email.",
+            )}
           </p>
         )}
       </div>

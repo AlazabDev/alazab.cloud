@@ -1,0 +1,96 @@
+{
+  "source": "code-archive (alazab.cloud-main.zip)",
+  "capabilities": [
+    {
+      "capability": "code: gateway page (/), settings (/settings), storage hub (/storage), 404",
+      "source": "React + Vite + react-router-dom SPA",
+      "outcome": "migrate to TanStack Start routes",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "design system (Alazab navy + yellow, IBM Plex Sans Arabic, card-glow, glass header)",
+      "source": "src/index.css + tailwind.config.ts",
+      "outcome": "port to src/styles.css oklch tokens",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "Arabic RTL default + English toggle",
+      "source": "src/lib/i18n.tsx (localStorage)",
+      "outcome": "migrate, hydration-safe",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "service directory (add/edit/delete/reset)",
+      "source": "src/lib/catalog.ts (browser localStorage, by documented design: no server, no accounts)",
+      "outcome": "keep browser storage as designed",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "schema",
+      "source": "generated Supabase client + types present but never imported by any page",
+      "outcome": "not applicable: app reads/writes no database tables",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "records",
+      "source": "none used by app",
+      "outcome": "not applicable",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "auth identities / authorization",
+      "source": "none: docs state no sign-in inside the gateway; each linked system authenticates itself",
+      "outcome": "not applicable",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "uploaded file bytes / storage",
+      "source": "public/ images and icons; src/assets/url.txt list of external Oracle object-storage URLs (unused)",
+      "outcome": "copy public files; keep URL list as docs",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "external providers / public endpoints / webhooks / schedules",
+      "source": "none; only outbound links + Google web search",
+      "outcome": "not applicable",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "secrets",
+      "source": ".env held only VITE_SUPABASE_* for the unused client",
+      "outcome": "not needed",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "SEO metadata",
+      "source": "index.html (ar title/description/og)",
+      "outcome": "per-route head()",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "cutover",
+      "source": "domain alazab.cloud",
+      "outcome": "user connects custom domain after publish",
+      "status": "pending",
+      "next_action": "user publishes and connects domain"
+    },
+    {
+      "capability": "verification",
+      "source": "-",
+      "outcome": "build OK, route tests pass, browser check: all 4 pages render, add-service saves and shows on gateway, EN/AR toggle persists across reload",
+      "status": "verified",
+      "next_action": "none"
+    }
+  ]
+}

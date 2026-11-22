@@ -12,9 +12,19 @@ export default function ArchivePage() {
     <div>
       <PageHeader
         title={tx("الأرشيف", "Archive")}
-        subtitle={tx("مستندات خارج التداول اليومي، محفوظة بكل إصداراتها. افتح أي مستند لاستعادته.", "Documents out of daily use, kept with all revisions. Open one to restore it.")}
+        subtitle={tx(
+          "مستندات خارج التداول اليومي، محفوظة بكل إصداراتها. افتح أي مستند لاستعادته.",
+          "Documents out of daily use, kept with all revisions. Open one to restore it.",
+        )}
       />
-      {docs.length === 0 ? <EmptyState icon={<Archive className="w-6 h-6" />} title={tx("الأرشيف فارغ", "The archive is empty")} /> : <DocumentsView docs={docs} view="list" />}
+      {docs.length === 0 ? (
+        <EmptyState
+          icon={<Archive className="w-6 h-6" />}
+          title={tx("الأرشيف فارغ", "The archive is empty")}
+        />
+      ) : (
+        <DocumentsView docs={docs} view="list" />
+      )}
     </div>
   );
 }

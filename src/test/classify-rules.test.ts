@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { DISCIPLINES, DOC_TYPES } from "@/lib/files/constants";
-import { DISCIPLINE_IDS, DOC_TYPE_IDS, canSuggest, normalizeSuggestion, uniqueIssuers, KNOWN_ISSUERS_MAX } from "@/lib/files/classify";
+import {
+  DISCIPLINE_IDS,
+  DOC_TYPE_IDS,
+  canSuggest,
+  normalizeSuggestion,
+  uniqueIssuers,
+  KNOWN_ISSUERS_MAX,
+} from "@/lib/files/classify";
 
 describe("AI classification rules", () => {
   it("only suggests categories the gallery offers", () => {
@@ -12,7 +19,13 @@ describe("AI classification rules", () => {
   });
 
   it("falls back to 'other' / 'general' for unknown values", () => {
-    const s = normalizeSuggestion({ doc_type: "invoice", discipline: "legal", issuing_party: null, confidence: "sure", reason: "x" });
+    const s = normalizeSuggestion({
+      doc_type: "invoice",
+      discipline: "legal",
+      issuing_party: null,
+      confidence: "sure",
+      reason: "x",
+    });
     expect(s.docType).toBe("other");
     expect(s.discipline).toBe("general");
     expect(s.confidence).toBe("low");
@@ -20,14 +33,26 @@ describe("AI classification rules", () => {
 
   it("reuses the exact spelling of a known issuer", () => {
     const s = normalizeSuggestion(
-      { doc_type: "shop_drawing", discipline: "structural", issuing_party: "  dar al-handasah ", confidence: "high", reason: "r" },
+      {
+        doc_type: "shop_drawing",
+        discipline: "structural",
+        issuing_party: "  dar al-handasah ",
+        confidence: "high",
+        reason: "r",
+      },
       ["Dar Al-Handasah"],
     );
     expect(s.issuingParty).toBe("Dar Al-Handasah");
   });
 
   it("keeps the issuer empty when none is stated", () => {
-    const s = normalizeSuggestion({ doc_type: "document", discipline: "general", issuing_party: "  ", confidence: "medium", reason: "r" });
+    const s = normalizeSuggestion({
+      doc_type: "document",
+      discipline: "general",
+      issuing_party: "  ",
+      confidence: "medium",
+      reason: "r",
+    });
     expect(s.issuingParty).toBeNull();
   });
 

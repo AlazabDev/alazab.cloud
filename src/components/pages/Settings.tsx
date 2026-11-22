@@ -14,7 +14,7 @@ import {
   Database,
   Globe,
 } from "lucide-react";
-import { loadCatalog, saveCatalog, resetCatalog, newId } from "@/lib/catalog";
+import { loadCatalog, saveService, deleteService } from "@/lib/catalog";
 import { STARTER_CATALOG, type ServiceItem, type ServiceCategory } from "@/data/catalog";
 import { useLang } from "@/lib/i18n";
 import ServiceIcon, { ICON_OPTIONS } from "@/components/ServiceIcon";
@@ -31,10 +31,10 @@ const EMPTY_FORM: Omit<ServiceItem, "id"> = {
 
 export default function Settings() {
   const { t, lang, setLang, dir } = useLang();
-  // Saved directory lives in this browser; read it after mount so server and first render match.
+  // Shared directory from the database; loaded after mount so server and first render match.
   const [items, setItems] = useState<ServiceItem[]>(STARTER_CATALOG);
   useEffect(() => {
-    setItems(loadCatalog());
+    void loadCatalog().then(setItems);
   }, []);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<ServiceItem, "id">>(EMPTY_FORM);
@@ -68,38 +68,38 @@ export default function Settings() {
     setIsFormOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const failText = (reason: "signin" | "error") =>
+    reason === "signin"
+      ? lang === "ar"
+        ? "سجّل الدخول بحساب موظف لحفظ التعديلات."
+        : "Sign in with a staff account to save changes."
+      : lang === "ar"
+        ? "تعذر الحفظ. تحقق من الرابط وحاول مرة أخرى."
+        : "Could not save. Check the link and try again.";
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.url.trim()) return;
-
-    let updated: ServiceItem[];
-    if (editingId) {
-      updated = items.map((it) => (it.id === editingId ? { ...form, id: editingId } : it));
-    } else {
-      updated = [{ ...form, id: newId() }, ...items];
-    }
-
-    setItems(updated);
-    saveCatalog(updated);
+    const res = await saveService(form, editingId ?? undefined);
+    if (!res.ok) return notify(failText(res.reason));
+    setItems(await loadCatalog());
     setIsFormOpen(false);
     setEditingId(null);
     setForm(EMPTY_FORM);
     notify(t.saved);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm(t.removeConfirm)) return;
-    const updated = items.filter((it) => it.id !== id);
-    setItems(updated);
-    saveCatalog(updated);
+    const res = await deleteService(id);
+    if (!res.ok) return notify(failText(res.reason));
+    setItems(await loadCatalog());
     notify(t.saved);
   };
 
-  const handleReset = () => {
-    if (!window.confirm(t.resetConfirm)) return;
-    const reset = resetCatalog();
-    setItems(reset);
-    notify(t.saved);
+  // Reloads the shared directory (others may have edited it).
+  const handleReset = async () => {
+    setItems(await loadCatalog());
   };
 
   return (

@@ -13,6 +13,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Clock,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { meQuery } from "@/lib/files/queries";
@@ -37,12 +38,56 @@ export default function FilesShell() {
 
   const nav = [
     { to: "/files", label: tx("الرئيسية", "Home"), icon: LayoutGrid, exact: true, show: true },
-    { to: "/files/projects", label: tx("المشروعات", "Projects"), icon: FolderKanban, exact: false, show: true },
-    { to: "/files/gallery", label: tx("المعرض", "Gallery"), icon: Images, exact: false, show: true },
-    { to: "/files/approvals", label: tx("الاعتمادات", "Approvals"), icon: FileCheck2, exact: false, show: true },
-    { to: "/files/shares", label: tx("المشاركات", "Shares"), icon: Share2, exact: false, show: me?.isStaff ?? false },
-    { to: "/files/archive", label: tx("الأرشيف", "Archive"), icon: Archive, exact: false, show: me?.isStaff ?? false },
-    { to: "/files/users", label: tx("المستخدمون", "Users"), icon: Users, exact: false, show: me?.isAdmin ?? false },
+    {
+      to: "/files/projects",
+      label: tx("المشروعات", "Projects"),
+      icon: FolderKanban,
+      exact: false,
+      show: true,
+    },
+    {
+      to: "/files/gallery",
+      label: tx("المعرض", "Gallery"),
+      icon: Images,
+      exact: false,
+      show: true,
+    },
+    {
+      to: "/files/approvals",
+      label: tx("الاعتمادات", "Approvals"),
+      icon: FileCheck2,
+      exact: false,
+      show: true,
+    },
+    // رابط المستندات والفواتير للموظفين:
+    {
+      to: "/azdocs",
+      label: tx("المستندات والفواتير", "Documents & Invoices"),
+      icon: FileText,
+      exact: false,
+      show: me?.isStaff ?? false,
+    },
+    {
+      to: "/files/shares",
+      label: tx("المشاركات", "Shares"),
+      icon: Share2,
+      exact: false,
+      show: me?.isStaff ?? false,
+    },
+    {
+      to: "/files/archive",
+      label: tx("الأرشيف", "Archive"),
+      icon: Archive,
+      exact: false,
+      show: me?.isStaff ?? false,
+    },
+    {
+      to: "/files/users",
+      label: tx("المستخدمون", "Users"),
+      icon: Users,
+      exact: false,
+      show: me?.isAdmin ?? false,
+    },
   ] as const;
 
   const displayName = me?.profile?.full_name || me?.email || "";
@@ -143,7 +188,9 @@ export default function FilesShell() {
           ) : (
             <div className="max-w-lg mx-auto mt-16 text-center card-glow rounded-2xl p-8">
               <Clock className="w-10 h-10 mx-auto text-primary" />
-              <h1 className="mt-4 text-xl font-bold">{tx("حسابك بانتظار التفعيل", "Your account is awaiting access")}</h1>
+              <h1 className="mt-4 text-xl font-bold">
+                {tx("حسابك بانتظار التفعيل", "Your account is awaiting access")}
+              </h1>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 {tx(
                   "تم إنشاء حسابك بنجاح. سيقوم مدير النظام في العزب بتحديد صلاحياتك (موظف أو عميل) وربطك بمشروعاتك، ثم يمكنك الدخول للمعرض.",

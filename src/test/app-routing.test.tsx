@@ -27,6 +27,7 @@ describe("File gallery routes", () => {
   it.each([
     ["/auth", "/auth"],
     ["/reset-password", "/reset-password"],
+    ["/azdocs", "/_authenticated/azdocs"],
     ["/files", "/_authenticated/files/"],
     ["/files/projects", "/_authenticated/files/projects/"],
     ["/files/projects/abc", "/_authenticated/files/projects/$projectId"],

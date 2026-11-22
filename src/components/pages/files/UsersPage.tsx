@@ -17,7 +17,12 @@ export default function UsersPage() {
   const { data: people } = useSuspenseQuery(peopleQuery());
 
   if (!me?.isAdmin) {
-    return <EmptyState icon={<Users className="w-6 h-6" />} title={tx("هذه الصفحة لمدير النظام فقط", "Administrators only")} />;
+    return (
+      <EmptyState
+        icon={<Users className="w-6 h-6" />}
+        title={tx("هذه الصفحة لمدير النظام فقط", "Administrators only")}
+      />
+    );
   }
 
   const options: { id: Access; label: string }[] = [
@@ -30,7 +35,11 @@ export default function UsersPage() {
   async function setAccess(userId: string, current: AppRole[], next: Access) {
     const toRemove = current.filter((r) => r !== next);
     if (toRemove.length) {
-      const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).in("role", toRemove);
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .in("role", toRemove);
       if (error) {
         toast.error(error.message);
         return;
@@ -53,11 +62,17 @@ export default function UsersPage() {
     <div>
       <PageHeader
         title={tx("المستخدمون والصلاحيات", "Users & access")}
-        subtitle={tx("حدّد نوع كل حساب. الموظفون يرون مشروعاتهم، والعملاء يرون فقط ما يُتاح لهم من مشروعاتهم.", "Set each account's type. Staff see their projects; clients only see what's released to them.")}
+        subtitle={tx(
+          "حدّد نوع كل حساب. الموظفون يرون مشروعاتهم، والعملاء يرون فقط ما يُتاح لهم من مشروعاتهم.",
+          "Set each account's type. Staff see their projects; clients only see what's released to them.",
+        )}
       />
       {pending.length > 0 && (
         <p className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm">
-          {tx(`${pending.length} حساب جديد بانتظار تحديد الصلاحية`, `${pending.length} new account(s) awaiting access`)}
+          {tx(
+            `${pending.length} حساب جديد بانتظار تحديد الصلاحية`,
+            `${pending.length} new account(s) awaiting access`,
+          )}
         </p>
       )}
       <div className="overflow-x-auto rounded-xl border border-border bg-card/40">
@@ -73,15 +88,26 @@ export default function UsersPage() {
           </thead>
           <tbody>
             {people.map((p) => {
-              const current: Access = p.roles.includes("admin") ? "admin" : p.roles.includes("staff") ? "staff" : p.roles.includes("client") ? "client" : "none";
+              const current: Access = p.roles.includes("admin")
+                ? "admin"
+                : p.roles.includes("staff")
+                  ? "staff"
+                  : p.roles.includes("client")
+                    ? "client"
+                    : "none";
               return (
-                <tr key={p.id} className="border-b border-border/50 last:border-0 [&>td]:px-3 [&>td]:py-2.5">
+                <tr
+                  key={p.id}
+                  className="border-b border-border/50 last:border-0 [&>td]:px-3 [&>td]:py-2.5"
+                >
                   <td className="font-medium">{p.full_name || "—"}</td>
                   <td className="text-xs" dir="ltr">
                     {p.email}
                   </td>
                   <td className="text-xs text-muted-foreground">{p.company || "—"}</td>
-                  <td className="text-xs text-muted-foreground">{formatDate(p.created_at, lang)}</td>
+                  <td className="text-xs text-muted-foreground">
+                    {formatDate(p.created_at, lang)}
+                  </td>
                   <td>
                     <select
                       className={`h-8 rounded-md border bg-background/60 px-2 text-xs ${current === "none" ? "border-primary/60" : "border-input"}`}

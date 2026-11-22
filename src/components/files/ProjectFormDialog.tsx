@@ -4,7 +4,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLang, useTx } from "@/lib/i18n";
 import { PROJECT_STATUSES } from "@/lib/files/constants";
@@ -33,7 +39,14 @@ export default function ProjectFormDialog({
   const { lang } = useLang();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", code: "", client_name: "", location: "", status: "active", description: "" });
+  const [form, setForm] = useState({
+    name: "",
+    code: "",
+    client_name: "",
+    location: "",
+    status: "active",
+    description: "",
+  });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -49,7 +62,8 @@ export default function ProjectFormDialog({
     }
   }, [open, project]);
 
-  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -91,7 +105,9 @@ export default function ProjectFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{project?.id ? tx("تعديل المشروع", "Edit project") : tx("مشروع جديد", "New project")}</DialogTitle>
+          <DialogTitle>
+            {project?.id ? tx("تعديل المشروع", "Edit project") : tx("مشروع جديد", "New project")}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={save} className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -100,7 +116,13 @@ export default function ProjectFormDialog({
             </Field>
           </div>
           <Field label={tx("كود المشروع", "Project code")}>
-            <input className={inputCls} dir="ltr" value={form.code} onChange={set("code")} placeholder="AZB-2026-014" />
+            <input
+              className={inputCls}
+              dir="ltr"
+              value={form.code}
+              onChange={set("code")}
+              placeholder="AZB-2026-014"
+            />
           </Field>
           <Field label={tx("الحالة", "Status")}>
             <select className={selectCls} value={form.status} onChange={set("status")}>
@@ -119,7 +141,11 @@ export default function ProjectFormDialog({
           </Field>
           <div className="sm:col-span-2">
             <Field label={tx("وصف مختصر", "Short description")}>
-              <textarea className={textareaCls} value={form.description} onChange={set("description")} />
+              <textarea
+                className={textareaCls}
+                value={form.description}
+                onChange={set("description")}
+              />
             </Field>
           </div>
           <DialogFooter className="sm:col-span-2">

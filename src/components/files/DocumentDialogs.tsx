@@ -3,7 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Copy, FileUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLang, useTx } from "@/lib/i18n";
 import {
@@ -31,7 +38,12 @@ function useRefresh() {
 }
 
 /* ---------- New revision ---------- */
-export function NewVersionDialog({ open, onOpenChange, projectId, documentId }: OpenProps & { projectId: string; documentId: string }) {
+export function NewVersionDialog({
+  open,
+  onOpenChange,
+  projectId,
+  documentId,
+}: OpenProps & { projectId: string; documentId: string }) {
   const tx = useTx();
   const refresh = useRefresh();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,7 +84,12 @@ export function NewVersionDialog({ open, onOpenChange, projectId, documentId }: 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{tx("رفع إصدار جديد", "Upload new revision")}</DialogTitle>
-          <DialogDescription>{tx("الإصدارات السابقة تبقى محفوظة كما هي مع قرارات اعتمادها.", "Earlier revisions stay untouched with their approval decisions.")}</DialogDescription>
+          <DialogDescription>
+            {tx(
+              "الإصدارات السابقة تبقى محفوظة كما هي مع قرارات اعتمادها.",
+              "Earlier revisions stay untouched with their approval decisions.",
+            )}
+          </DialogDescription>
         </DialogHeader>
         <button
           type="button"
@@ -80,7 +97,9 @@ export function NewVersionDialog({ open, onOpenChange, projectId, documentId }: 
           className="rounded-xl border-2 border-dashed border-border hover:border-primary/60 p-5 text-center"
         >
           <FileUp className="w-7 h-7 mx-auto text-primary" />
-          <p className="mt-2 text-sm">{file ? `${file.name} · ${formatBytes(file.size)}` : tx("اختر الملف", "Choose file")}</p>
+          <p className="mt-2 text-sm">
+            {file ? `${file.name} · ${formatBytes(file.size)}` : tx("اختر الملف", "Choose file")}
+          </p>
         </button>
         <input
           ref={inputRef}
@@ -89,11 +108,24 @@ export function NewVersionDialog({ open, onOpenChange, projectId, documentId }: 
           accept={ALLOWED_EXTENSIONS.map((e) => "." + e).join(",")}
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
-        <Field label={tx("رمز المراجعة", "Revision label")} hint={tx("فارغ = ترقيم تلقائي", "Empty = automatic")}>
-          <input className={inputCls} dir="ltr" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="R01" />
+        <Field
+          label={tx("رمز المراجعة", "Revision label")}
+          hint={tx("فارغ = ترقيم تلقائي", "Empty = automatic")}
+        >
+          <input
+            className={inputCls}
+            dir="ltr"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="R01"
+          />
         </Field>
         <Field label={tx("ما الذي تغيّر؟", "What changed?")}>
-          <textarea className={textareaCls} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <textarea
+            className={textareaCls}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
         </Field>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
@@ -154,23 +186,45 @@ export function ApprovalRequestDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{tx("طلب اعتماد", "Request approval")}</DialogTitle>
-          <DialogDescription>{tx(`للإصدار ${versionLabel}`, `For revision ${versionLabel}`)}</DialogDescription>
+          <DialogDescription>
+            {tx(`للإصدار ${versionLabel}`, `For revision ${versionLabel}`)}
+          </DialogDescription>
         </DialogHeader>
-        <Field label={tx("المراجِع", "Reviewer")} hint={tx("اتركه فارغًا ليقرر أي مدير للمشروع", "Leave empty so any project manager can decide")}>
-          <select className={selectCls} value={reviewer} onChange={(e) => setReviewer(e.target.value)}>
+        <Field
+          label={tx("المراجِع", "Reviewer")}
+          hint={tx(
+            "اتركه فارغًا ليقرر أي مدير للمشروع",
+            "Leave empty so any project manager can decide",
+          )}
+        >
+          <select
+            className={selectCls}
+            value={reviewer}
+            onChange={(e) => setReviewer(e.target.value)}
+          >
             <option value="">{tx("— مدير المشروع —", "— Project manager —")}</option>
             {data?.members.map((m) => (
               <option key={m.user_id} value={m.user_id}>
-                {m.profile?.full_name || m.profile?.email || m.user_id} · {labelOf(MEMBER_ROLES, m.member_role, lang)}
+                {m.profile?.full_name || m.profile?.email || m.user_id} ·{" "}
+                {labelOf(MEMBER_ROLES, m.member_role, lang)}
               </option>
             ))}
           </select>
         </Field>
         {reviewerRole === "client" && (
-          <p className="text-xs text-primary">{tx("سيصبح المستند مرئيًا لهذا العميل حتى يتمكن من المراجعة.", "The document will be released to this client so they can review it.")}</p>
+          <p className="text-xs text-primary">
+            {tx(
+              "سيصبح المستند مرئيًا لهذا العميل حتى يتمكن من المراجعة.",
+              "The document will be released to this client so they can review it.",
+            )}
+          </p>
         )}
         <Field label={tx("ملاحظة للمراجِع", "Note for the reviewer")}>
-          <textarea className={textareaCls} value={note} onChange={(e) => setNote(e.target.value)} />
+          <textarea
+            className={textareaCls}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
         </Field>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -199,7 +253,11 @@ export function DecisionDialog({
   const [busy, setBusy] = useState(false);
 
   const title =
-    decision === "approved" ? tx("اعتماد الإصدار", "Approve revision") : decision === "rejected" ? tx("رفض الإصدار", "Reject revision") : tx("طلب تعديلات", "Request changes");
+    decision === "approved"
+      ? tx("اعتماد الإصدار", "Approve revision")
+      : decision === "rejected"
+        ? tx("رفض الإصدار", "Reject revision")
+        : tx("طلب تعديلات", "Request changes");
 
   async function submit() {
     setBusy(true);
@@ -230,13 +288,22 @@ export function DecisionDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <Field label={tx("ملاحظات القرار", "Decision notes")}>
-          <textarea className={textareaCls} value={note} onChange={(e) => setNote(e.target.value)} required={decision !== "approved"} />
+          <textarea
+            className={textareaCls}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            required={decision !== "approved"}
+          />
         </Field>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {tx("إلغاء", "Cancel")}
           </Button>
-          <Button variant={decision === "rejected" ? "destructive" : "default"} onClick={submit} disabled={busy || (decision !== "approved" && !note.trim())}>
+          <Button
+            variant={decision === "rejected" ? "destructive" : "default"}
+            onClick={submit}
+            disabled={busy || (decision !== "approved" && !note.trim())}
+          >
             {busy && <Loader2 className="animate-spin" />}
             {tx("تأكيد", "Confirm")}
           </Button>
@@ -247,7 +314,13 @@ export function DecisionDialog({
 }
 
 /* ---------- Share link ---------- */
-export function ShareDialog({ open, onOpenChange, documentId, versionId, projectId }: OpenProps & { documentId: string; versionId: string | null; projectId: string }) {
+export function ShareDialog({
+  open,
+  onOpenChange,
+  documentId,
+  versionId,
+  projectId,
+}: OpenProps & { documentId: string; versionId: string | null; projectId: string }) {
   const tx = useTx();
   const refresh = useRefresh();
   const [recipient, setRecipient] = useState("");
@@ -303,12 +376,23 @@ export function ShareDialog({ open, onOpenChange, documentId, versionId, project
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{tx("مشاركة مع جهة خارجية", "Share externally")}</DialogTitle>
-          <DialogDescription>{tx("رابط مقيد بمدة، يمكن إلغاؤه في أي وقت، وكل فتح له يُسجَّل.", "A time-limited link you can revoke anytime; every open is logged.")}</DialogDescription>
+          <DialogDescription>
+            {tx(
+              "رابط مقيد بمدة، يمكن إلغاؤه في أي وقت، وكل فتح له يُسجَّل.",
+              "A time-limited link you can revoke anytime; every open is logged.",
+            )}
+          </DialogDescription>
         </DialogHeader>
         {link ? (
           <div className="space-y-3">
             <div className="flex gap-2">
-              <input readOnly dir="ltr" value={link} className={`${inputCls} font-mono text-xs`} onFocus={(e) => e.target.select()} />
+              <input
+                readOnly
+                dir="ltr"
+                value={link}
+                className={`${inputCls} font-mono text-xs`}
+                onFocus={(e) => e.target.select()}
+              />
               <Button onClick={copy} variant="secondary">
                 {copied ? <Check /> : <Copy />}
               </Button>
@@ -320,7 +404,12 @@ export function ShareDialog({ open, onOpenChange, documentId, versionId, project
         ) : (
           <>
             <Field label={tx("المستفيد", "Recipient")}>
-              <input className={inputCls} value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder={tx("مثال: استشاري المشروع", "e.g. Project consultant")} />
+              <input
+                className={inputCls}
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder={tx("مثال: استشاري المشروع", "e.g. Project consultant")}
+              />
             </Field>
             <Field label={tx("مدة الصلاحية", "Valid for")}>
               <select className={selectCls} value={days} onChange={(e) => setDays(e.target.value)}>
@@ -331,14 +420,31 @@ export function ShareDialog({ open, onOpenChange, documentId, versionId, project
               </select>
             </Field>
             <Field label={tx("رسالة تظهر للمستفيد", "Message for the recipient")}>
-              <textarea className={textareaCls} value={note} onChange={(e) => setNote(e.target.value)} />
+              <textarea
+                className={textareaCls}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
             </Field>
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" className="accent-primary w-4 h-4" checked={pinVersion} onChange={(e) => setPinVersion(e.target.checked)} />
-              {tx("مشاركة هذا الإصدار تحديدًا (وليس أحدث إصدار دائمًا)", "Share this exact revision (not always the latest)")}
+              <input
+                type="checkbox"
+                className="accent-primary w-4 h-4"
+                checked={pinVersion}
+                onChange={(e) => setPinVersion(e.target.checked)}
+              />
+              {tx(
+                "مشاركة هذا الإصدار تحديدًا (وليس أحدث إصدار دائمًا)",
+                "Share this exact revision (not always the latest)",
+              )}
             </label>
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" className="accent-primary w-4 h-4" checked={allowDownload} onChange={(e) => setAllowDownload(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="accent-primary w-4 h-4"
+                checked={allowDownload}
+                onChange={(e) => setAllowDownload(e.target.checked)}
+              />
               {tx("السماح بالتنزيل", "Allow download")}
             </label>
             <DialogFooter>
@@ -419,14 +525,27 @@ export function EditDocumentDialog({ open, onOpenChange, doc }: OpenProps & { do
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Field label={tx("العنوان", "Title")}>
-              <input className={inputCls} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
+              <input
+                className={inputCls}
+                value={f.title}
+                onChange={(e) => setF({ ...f, title: e.target.value })}
+              />
             </Field>
           </div>
           <Field label={tx("رقم المستند", "Doc number")}>
-            <input className={inputCls} dir="ltr" value={f.doc_number ?? ""} onChange={(e) => setF({ ...f, doc_number: e.target.value })} />
+            <input
+              className={inputCls}
+              dir="ltr"
+              value={f.doc_number ?? ""}
+              onChange={(e) => setF({ ...f, doc_number: e.target.value })}
+            />
           </Field>
           <Field label={tx("الحالة", "Status")}>
-            <select className={selectCls} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as DocumentStatus })}>
+            <select
+              className={selectCls}
+              value={f.status}
+              onChange={(e) => setF({ ...f, status: e.target.value as DocumentStatus })}
+            >
               {DOC_STATUSES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {lang === "ar" ? s.ar : s.en}
@@ -435,7 +554,11 @@ export function EditDocumentDialog({ open, onOpenChange, doc }: OpenProps & { do
             </select>
           </Field>
           <Field label={tx("التصنيف", "Category")}>
-            <select className={selectCls} value={f.doc_type} onChange={(e) => setF({ ...f, doc_type: e.target.value })}>
+            <select
+              className={selectCls}
+              value={f.doc_type}
+              onChange={(e) => setF({ ...f, doc_type: e.target.value })}
+            >
               {DOC_TYPES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {lang === "ar" ? s.ar : s.en}
@@ -444,7 +567,11 @@ export function EditDocumentDialog({ open, onOpenChange, doc }: OpenProps & { do
             </select>
           </Field>
           <Field label={tx("التخصص", "Discipline")}>
-            <select className={selectCls} value={f.discipline} onChange={(e) => setF({ ...f, discipline: e.target.value })}>
+            <select
+              className={selectCls}
+              value={f.discipline}
+              onChange={(e) => setF({ ...f, discipline: e.target.value })}
+            >
               {DISCIPLINES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {lang === "ar" ? s.ar : s.en}
@@ -454,17 +581,29 @@ export function EditDocumentDialog({ open, onOpenChange, doc }: OpenProps & { do
           </Field>
           <div className="sm:col-span-2">
             <Field label={tx("الجهة المُصدِرة", "Issuing party")}>
-              <input className={inputCls} value={f.issuing_party ?? ""} onChange={(e) => setF({ ...f, issuing_party: e.target.value })} />
+              <input
+                className={inputCls}
+                value={f.issuing_party ?? ""}
+                onChange={(e) => setF({ ...f, issuing_party: e.target.value })}
+              />
             </Field>
           </div>
           <div className="sm:col-span-2">
             <Field label={tx("كلمات دلالية (مفصولة بفاصلة)", "Tags (comma separated)")}>
-              <input className={inputCls} value={f.tagsText} onChange={(e) => setF({ ...f, tagsText: e.target.value })} />
+              <input
+                className={inputCls}
+                value={f.tagsText}
+                onChange={(e) => setF({ ...f, tagsText: e.target.value })}
+              />
             </Field>
           </div>
           <div className="sm:col-span-2">
             <Field label={tx("الوصف", "Description")}>
-              <textarea className={textareaCls} value={f.description ?? ""} onChange={(e) => setF({ ...f, description: e.target.value })} />
+              <textarea
+                className={textareaCls}
+                value={f.description ?? ""}
+                onChange={(e) => setF({ ...f, description: e.target.value })}
+              />
             </Field>
           </div>
           <div className="sm:col-span-2">

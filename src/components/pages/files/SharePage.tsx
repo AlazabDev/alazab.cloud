@@ -23,7 +23,10 @@ export default function SharePage() {
             ALAZAB <span className="text-primary">Files</span>
           </span>
           <span className="flex-1" />
-          <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} className="h-9 px-3 rounded-lg border border-border text-sm font-semibold hover:text-primary">
+          <button
+            onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            className="h-9 px-3 rounded-lg border border-border text-sm font-semibold hover:text-primary"
+          >
             {lang === "ar" ? "EN" : "ع"}
           </button>
         </div>
@@ -31,7 +34,11 @@ export default function SharePage() {
       <main className="section-container flex-1 py-8 w-full">
         {data.status !== "ok" ? (
           <div className="max-w-md mx-auto mt-16 text-center card-glow rounded-2xl p-8">
-            {data.status === "expired" ? <Clock className="w-10 h-10 mx-auto text-primary" /> : <Link2Off className="w-10 h-10 mx-auto text-primary" />}
+            {data.status === "expired" ? (
+              <Clock className="w-10 h-10 mx-auto text-primary" />
+            ) : (
+              <Link2Off className="w-10 h-10 mx-auto text-primary" />
+            )}
             <h1 className="mt-4 text-xl font-bold">
               {data.status === "expired"
                 ? tx("انتهت صلاحية رابط المشاركة", "This share link has expired")
@@ -39,7 +46,12 @@ export default function SharePage() {
                   ? tx("تم إلغاء رابط المشاركة", "This share link was revoked")
                   : tx("رابط المشاركة غير موجود", "Share link not found")}
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{tx("تواصل مع فريق العزب للحصول على رابط جديد.", "Contact the Alazab team for a new link.")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {tx(
+                "تواصل مع فريق العزب للحصول على رابط جديد.",
+                "Contact the Alazab team for a new link.",
+              )}
+            </p>
           </div>
         ) : (
           <div className="space-y-5">
@@ -51,7 +63,8 @@ export default function SharePage() {
                 <h1 className="text-2xl font-bold mt-1">{data.title}</h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   {data.docNumber && <span className="font-mono me-3">{data.docNumber}</span>}
-                  {tx("الإصدار", "Revision")} {data.revisionLabel ?? data.versionNumber} · {data.fileName} · {formatBytes(data.sizeBytes)}
+                  {tx("الإصدار", "Revision")} {data.revisionLabel ?? data.versionNumber} ·{" "}
+                  {data.fileName} · {formatBytes(data.sizeBytes)}
                 </p>
               </div>
               {data.downloadUrl && (
@@ -62,10 +75,21 @@ export default function SharePage() {
                 </Button>
               )}
             </div>
-            {data.note && <p className="rounded-xl border border-border bg-card/50 p-4 text-sm">{data.note}</p>}
-            <FilePreview fileName={data.fileName} url={data.viewUrl} downloadUrl={data.downloadUrl} className="h-[70vh]" />
+            {data.note && (
+              <p className="rounded-xl border border-border bg-card/50 p-4 text-sm">{data.note}</p>
+            )}
+            <FilePreview
+              fileName={data.fileName}
+              url={data.viewUrl}
+              downloadUrl={data.downloadUrl}
+              className="h-[70vh]"
+            />
             <p className="text-xs text-muted-foreground">
-              {data.recipient && <>{tx("مُرسل إلى", "Shared with")}: {data.recipient} · </>}
+              {data.recipient && (
+                <>
+                  {tx("مُرسل إلى", "Shared with")}: {data.recipient} ·{" "}
+                </>
+              )}
               {tx("الرابط صالح حتى", "Link valid until")} {formatDateTime(data.expiresAt, lang)}
             </p>
           </div>

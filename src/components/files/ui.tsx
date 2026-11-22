@@ -30,17 +30,34 @@ const STATUS_TONE: Record<string, string> = {
   superseded: "bg-muted text-muted-foreground border-border line-through",
 };
 
-export function StatusBadge({ status, kind = "document" }: { status: DocumentStatus | ApprovalStatus; kind?: "document" | "approval" }) {
+export function StatusBadge({
+  status,
+  kind = "document",
+}: {
+  status: DocumentStatus | ApprovalStatus;
+  kind?: "document" | "approval";
+}) {
   const { lang } = useLang();
   const label = labelOf(kind === "approval" ? APPROVAL_STATUSES : DOC_STATUSES, status, lang);
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap", STATUS_TONE[status])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
+        STATUS_TONE[status],
+      )}
+    >
       {label}
     </span>
   );
 }
 
-export function KindIcon({ fileName, className }: { fileName: string | null | undefined; className?: string }) {
+export function KindIcon({
+  fileName,
+  className,
+}: {
+  fileName: string | null | undefined;
+  className?: string;
+}) {
   const name = fileName ?? "";
   const kind = fileKind(name);
   const ext = fileExtension(name);
@@ -54,7 +71,15 @@ export function KindIcon({ fileName, className }: { fileName: string | null | un
   return <FileIcon className={cls} />;
 }
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string | undefined; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: string | undefined;
+  actions?: ReactNode;
+}) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
@@ -66,10 +91,22 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function EmptyState({ icon, title, body, action }: { icon: ReactNode; title: string; body?: string | undefined; action?: ReactNode }) {
+export function EmptyState({
+  icon,
+  title,
+  body,
+  action,
+}: {
+  icon: ReactNode;
+  title: string;
+  body?: string | undefined;
+  action?: ReactNode;
+}) {
   return (
     <div className="text-center py-16 px-6 border border-dashed border-border rounded-2xl bg-card/30">
-      <div className="mx-auto w-12 h-12 grid place-items-center rounded-xl bg-secondary text-primary">{icon}</div>
+      <div className="mx-auto w-12 h-12 grid place-items-center rounded-xl bg-secondary text-primary">
+        {icon}
+      </div>
       <p className="mt-4 font-medium">{title}</p>
       {body && <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">{body}</p>}
       {action && <div className="mt-5">{action}</div>}
@@ -77,7 +114,15 @@ export function EmptyState({ icon, title, body, action }: { icon: ReactNode; tit
   );
 }
 
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string | undefined }) {
+export function Field({
+  label,
+  children,
+  hint,
+}: {
+  label: string;
+  children: ReactNode;
+  hint?: string | undefined;
+}) {
   return (
     <label className="block space-y-1.5">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>

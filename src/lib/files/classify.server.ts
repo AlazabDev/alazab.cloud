@@ -34,7 +34,11 @@ export async function classifyDocument(opts: {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
     console.error("[classify] LOVABLE_API_KEY is missing");
-    return { ok: false, code: "failed", message: ar ? "خدمة الذكاء الاصطناعي غير مُعدّة بعد." : "AI service is not configured." };
+    return {
+      ok: false,
+      code: "failed",
+      message: ar ? "خدمة الذكاء الاصطناعي غير مُعدّة بعد." : "AI service is not configured.",
+    };
   }
 
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(opts.request));
@@ -74,20 +78,58 @@ export async function classifyDocument(opts: {
 function mapError(error: unknown, ar: boolean): ClassifyResult {
   const api = findApiError(error);
   const status = api?.statusCode;
-  console.error("[classify] AI call failed", status ?? "", error instanceof Error ? error.message : error);
+  console.error(
+    "[classify] AI call failed",
+    status ?? "",
+    error instanceof Error ? error.message : error,
+  );
   if (status === 402) {
-    return { ok: false, code: "credits", message: safeMessage(api) ?? (ar ? "رصيد الذكاء الاصطناعي نفد. أضف رصيدًا ثم حاول مرة أخرى." : "AI credits are used up. Add credits and try again.") };
+    return {
+      ok: false,
+      code: "credits",
+      message:
+        safeMessage(api) ??
+        (ar
+          ? "رصيد الذكاء الاصطناعي نفد. أضف رصيدًا ثم حاول مرة أخرى."
+          : "AI credits are used up. Add credits and try again."),
+    };
   }
   if (status === 429) {
-    return { ok: false, code: "busy", message: ar ? "الخدمة مشغولة الآن. انتظر دقيقة وحاول مرة أخرى." : "The AI service is busy. Wait a minute and try again." };
+    return {
+      ok: false,
+      code: "busy",
+      message: ar
+        ? "الخدمة مشغولة الآن. انتظر دقيقة وحاول مرة أخرى."
+        : "The AI service is busy. Wait a minute and try again.",
+    };
   }
   if (status === 403) {
-    return { ok: false, code: "denied", message: safeMessage(api) ?? (ar ? "الوصول إلى خدمة الذكاء الاصطناعي غير متاح حاليًا." : "Access to the AI service is currently blocked.") };
+    return {
+      ok: false,
+      code: "denied",
+      message:
+        safeMessage(api) ??
+        (ar
+          ? "الوصول إلى خدمة الذكاء الاصطناعي غير متاح حاليًا."
+          : "Access to the AI service is currently blocked."),
+    };
   }
   if (NoObjectGeneratedError.isInstance(error)) {
-    return { ok: false, code: "failed", message: ar ? "لم يتمكن النموذج من اقتراح تصنيف لهذا النص. اختر التصنيف يدويًا." : "The model could not suggest a classification for this text. Choose it manually." };
+    return {
+      ok: false,
+      code: "failed",
+      message: ar
+        ? "لم يتمكن النموذج من اقتراح تصنيف لهذا النص. اختر التصنيف يدويًا."
+        : "The model could not suggest a classification for this text. Choose it manually.",
+    };
   }
-  return { ok: false, code: "failed", message: ar ? "تعذّر الحصول على اقتراح الآن. حاول مرة أخرى بعد قليل." : "Could not get a suggestion right now. Try again shortly." };
+  return {
+    ok: false,
+    code: "failed",
+    message: ar
+      ? "تعذّر الحصول على اقتراح الآن. حاول مرة أخرى بعد قليل."
+      : "Could not get a suggestion right now. Try again shortly.",
+  };
 }
 
 function findApiError(error: unknown): APICallError | undefined {
@@ -102,8 +144,16 @@ function findApiError(error: unknown): APICallError | undefined {
 function safeMessage(api: APICallError | undefined): string | undefined {
   if (!api?.responseBody) return undefined;
   try {
-    const body = JSON.parse(api.responseBody) as { message?: unknown; error?: { message?: unknown } };
-    const msg = typeof body.message === "string" ? body.message : typeof body.error?.message === "string" ? body.error.message : undefined;
+    const body = JSON.parse(api.responseBody) as {
+      message?: unknown;
+      error?: { message?: unknown };
+    };
+    const msg =
+      typeof body.message === "string"
+        ? body.message
+        : typeof body.error?.message === "string"
+          ? body.error.message
+          : undefined;
     return msg?.slice(0, 300);
   } catch {
     return undefined;

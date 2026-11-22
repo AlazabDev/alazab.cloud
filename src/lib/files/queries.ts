@@ -36,7 +36,9 @@ export const meQuery = () =>
       };
     },
   });
-export type Me = NonNullable<Awaited<ReturnType<NonNullable<ReturnType<typeof meQuery>["queryFn"]>>>>;
+export type Me = NonNullable<
+  Awaited<ReturnType<NonNullable<ReturnType<typeof meQuery>["queryFn"]>>>
+>;
 
 /* ---------- Projects ---------- */
 
@@ -48,7 +50,11 @@ export const projectsQuery = () =>
         data: { user },
       } = await supabase.auth.getUser();
       const [projects, mine] = await Promise.all([
-        supabase.from("projects").select("*, documents(count)").order("updated_at", { ascending: false }).then(check),
+        supabase
+          .from("projects")
+          .select("*, documents(count)")
+          .order("updated_at", { ascending: false })
+          .then(check),
         supabase
           .from("project_members")
           .select("project_id, member_role")
@@ -62,7 +68,9 @@ export const projectsQuery = () =>
       });
     },
   });
-export type ProjectRow = Awaited<ReturnType<NonNullable<ReturnType<typeof projectsQuery>["queryFn"]>>>[number];
+export type ProjectRow = Awaited<
+  ReturnType<NonNullable<ReturnType<typeof projectsQuery>["queryFn"]>>
+>[number];
 
 export const projectQuery = (projectId: string) =>
   queryOptions({
@@ -82,20 +90,31 @@ export const projectQuery = (projectId: string) =>
           .then(check),
       ]);
       const myRole = (members ?? []).find((m) => m.user_id === user?.id)?.member_role ?? null;
-      return { project, folders: folders ?? [], members: members ?? [], myRole: myRole as MemberRole | null };
+      return {
+        project,
+        folders: folders ?? [],
+        members: members ?? [],
+        myRole: myRole as MemberRole | null,
+      };
     },
   });
-export type ProjectDetail = Awaited<ReturnType<NonNullable<ReturnType<typeof projectQuery>["queryFn"]>>>;
+export type ProjectDetail = Awaited<
+  ReturnType<NonNullable<ReturnType<typeof projectQuery>["queryFn"]>>
+>;
 
 /* ---------- Documents ---------- */
 
 const DOC_SELECT =
   "*, project:projects(id, name, code), document_versions(id, version_number, revision_label, file_name, mime_type, size_bytes, storage_path, created_at)";
 
-function withLatest<T extends { document_versions: { version_number: number }[] | null }>(rows: T[]) {
+function withLatest<T extends { document_versions: { version_number: number }[] | null }>(
+  rows: T[],
+) {
   type V = NonNullable<T["document_versions"]>[number];
   return rows.map((d) => {
-    const versions = [...((d.document_versions ?? []) as V[])].sort((a, b) => b.version_number - a.version_number);
+    const versions = [...((d.document_versions ?? []) as V[])].sort(
+      (a, b) => b.version_number - a.version_number,
+    );
     return { ...d, latest: (versions[0] ?? null) as V | null, versionCount: versions.length };
   });
 }
@@ -104,14 +123,20 @@ export const documentsQuery = (opts: { projectId?: string; archived?: boolean } 
   queryOptions({
     queryKey: ["files", "documents", opts.projectId ?? "all", opts.archived ? "archived" : "live"],
     queryFn: async () => {
-      let q = supabase.from("documents").select(DOC_SELECT).order("updated_at", { ascending: false }).limit(1000);
+      let q = supabase
+        .from("documents")
+        .select(DOC_SELECT)
+        .order("updated_at", { ascending: false })
+        .limit(1000);
       if (opts.projectId) q = q.eq("project_id", opts.projectId);
       q = opts.archived ? q.not("archived_at", "is", null) : q.is("archived_at", null);
       const rows = check(await q);
       return withLatest(rows ?? []);
     },
   });
-export type DocRow = Awaited<ReturnType<NonNullable<ReturnType<typeof documentsQuery>["queryFn"]>>>[number];
+export type DocRow = Awaited<
+  ReturnType<NonNullable<ReturnType<typeof documentsQuery>["queryFn"]>>
+>[number];
 
 export const documentQuery = (documentId: string) =>
   queryOptions({
@@ -137,7 +162,9 @@ export const documentQuery = (documentId: string) =>
           .then(check),
         supabase
           .from("approvals")
-          .select("*, reviewer:profiles(id, full_name, email), version:document_versions(version_number, revision_label)")
+          .select(
+            "*, reviewer:profiles(id, full_name, email), version:document_versions(version_number, revision_label)",
+          )
           .eq("document_id", documentId)
           .order("created_at", { ascending: false })
           .then(check),
@@ -172,7 +199,9 @@ export const documentQuery = (documentId: string) =>
       };
     },
   });
-export type DocumentDetail = NonNullable<Awaited<ReturnType<NonNullable<ReturnType<typeof documentQuery>["queryFn"]>>>>;
+export type DocumentDetail = NonNullable<
+  Awaited<ReturnType<NonNullable<ReturnType<typeof documentQuery>["queryFn"]>>>
+>;
 
 /* ---------- Approvals & shares ---------- */
 
@@ -246,7 +275,8 @@ export const thumbsQuery = (paths: string[]) =>
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(paths, 60 * 60);
       if (error) throw error;
       const map: Record<string, string> = {};
-      for (const item of data ?? []) if (item.path && item.signedUrl) map[item.path] = item.signedUrl;
+      for (const item of data ?? [])
+        if (item.path && item.signedUrl) map[item.path] = item.signedUrl;
       return map;
     },
   });

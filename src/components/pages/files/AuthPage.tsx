@@ -81,7 +81,10 @@ export default function AuthPage() {
         msg.includes("Invalid login")
           ? tx("البريد أو كلمة المرور غير صحيحة", "Wrong email or password")
           : msg.includes("Email not confirmed")
-            ? tx("يرجى تأكيد بريدك الإلكتروني أولًا من الرسالة المرسلة إليك", "Please confirm your email first")
+            ? tx(
+                "يرجى تأكيد بريدك الإلكتروني أولًا من الرسالة المرسلة إليك",
+                "Please confirm your email first",
+              )
             : msg,
       );
     } finally {
@@ -93,10 +96,16 @@ export default function AuthPage() {
     <div className="min-h-screen grid place-items-center p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
             <Back className="w-3.5 h-3.5" /> {tx("البوابة", "Gateway")}
           </Link>
-          <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} className="h-8 px-3 rounded-lg border border-border text-xs font-semibold hover:text-primary">
+          <button
+            onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+            className="h-8 px-3 rounded-lg border border-border text-xs font-semibold hover:text-primary"
+          >
             {lang === "ar" ? "EN" : "ع"}
           </button>
         </div>
@@ -109,20 +118,40 @@ export default function AuthPage() {
               <h1 className="text-lg font-bold">
                 ALAZAB <span className="text-primary">Files</span>
               </h1>
-              <p className="text-xs text-muted-foreground">{tx("معرض ملفات المشروعات — للموظفين والعملاء", "Project files gallery — staff & clients")}</p>
+              <p className="text-xs text-muted-foreground">
+                {tx(
+                  "معرض ملفات المشروعات — للموظفين والعملاء",
+                  "Project files gallery — staff & clients",
+                )}
+              </p>
             </div>
           </div>
 
           {sentTo ? (
             <div className="text-center py-4">
               <MailCheck className="w-10 h-10 mx-auto text-primary" />
-              <p className="mt-3 font-medium">{tx("تحقق من بريدك الإلكتروني", "Check your email")}</p>
+              <p className="mt-3 font-medium">
+                {tx("تحقق من بريدك الإلكتروني", "Check your email")}
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {mode === "forgot"
-                  ? tx(`أرسلنا رابط تعيين كلمة المرور إلى ${sentTo}`, `We sent a reset link to ${sentTo}`)
-                  : tx(`أرسلنا رابط تأكيد الحساب إلى ${sentTo}. بعد التأكيد سجّل الدخول.`, `We sent a confirmation link to ${sentTo}. Confirm, then sign in.`)}
+                  ? tx(
+                      `أرسلنا رابط تعيين كلمة المرور إلى ${sentTo}`,
+                      `We sent a reset link to ${sentTo}`,
+                    )
+                  : tx(
+                      `أرسلنا رابط تأكيد الحساب إلى ${sentTo}. بعد التأكيد سجّل الدخول.`,
+                      `We sent a confirmation link to ${sentTo}. Confirm, then sign in.`,
+                    )}
               </p>
-              <Button variant="outline" className="mt-5" onClick={() => { setSentTo(null); setMode("signin"); }}>
+              <Button
+                variant="outline"
+                className="mt-5"
+                onClick={() => {
+                  setSentTo(null);
+                  setMode("signin");
+                }}
+              >
                 {tx("العودة لتسجيل الدخول", "Back to sign in")}
               </Button>
             </div>
@@ -137,7 +166,9 @@ export default function AuthPage() {
                       onClick={() => setMode(m)}
                       className={`h-9 rounded-md text-sm font-medium transition-colors ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                     >
-                      {m === "signin" ? tx("تسجيل الدخول", "Sign in") : tx("حساب جديد", "Create account")}
+                      {m === "signin"
+                        ? tx("تسجيل الدخول", "Sign in")
+                        : tx("حساب جديد", "Create account")}
                     </button>
                   ))}
                 </div>
@@ -146,15 +177,32 @@ export default function AuthPage() {
                 {mode === "signup" && (
                   <>
                     <Field label={tx("الاسم الكامل", "Full name")}>
-                      <input required className={inputCls} value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                      <input
+                        required
+                        className={inputCls}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
                     </Field>
                     <Field label={tx("الشركة / الجهة (للعملاء)", "Company (for clients)")}>
-                      <input className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} />
+                      <input
+                        className={inputCls}
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                      />
                     </Field>
                   </>
                 )}
                 <Field label={tx("البريد الإلكتروني", "Email")}>
-                  <input required type="email" dir="ltr" autoComplete="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input
+                    required
+                    type="email"
+                    dir="ltr"
+                    autoComplete="email"
+                    className={inputCls}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </Field>
                 {mode !== "forgot" && (
                   <Field label={tx("كلمة المرور", "Password")}>
@@ -172,16 +220,26 @@ export default function AuthPage() {
                 )}
                 <Button type="submit" className="w-full h-10" disabled={busy}>
                   {busy && <Loader2 className="animate-spin" />}
-                  {mode === "signin" ? tx("دخول", "Sign in") : mode === "signup" ? tx("إنشاء الحساب", "Create account") : tx("إرسال رابط التعيين", "Send reset link")}
+                  {mode === "signin"
+                    ? tx("دخول", "Sign in")
+                    : mode === "signup"
+                      ? tx("إنشاء الحساب", "Create account")
+                      : tx("إرسال رابط التعيين", "Send reset link")}
                 </Button>
               </form>
               <div className="mt-4 text-center text-xs">
                 {mode === "forgot" ? (
-                  <button className="text-primary hover:underline" onClick={() => setMode("signin")}>
+                  <button
+                    className="text-primary hover:underline"
+                    onClick={() => setMode("signin")}
+                  >
                     {tx("العودة لتسجيل الدخول", "Back to sign in")}
                   </button>
                 ) : (
-                  <button className="text-muted-foreground hover:text-primary" onClick={() => setMode("forgot")}>
+                  <button
+                    className="text-muted-foreground hover:text-primary"
+                    onClick={() => setMode("forgot")}
+                  >
                     {tx("نسيت كلمة المرور؟", "Forgot password?")}
                   </button>
                 )}

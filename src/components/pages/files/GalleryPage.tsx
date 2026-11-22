@@ -35,16 +35,34 @@ export default function GalleryPage() {
     if (search.discipline && d.discipline !== search.discipline) return false;
     if (search.status && d.status !== search.status) return false;
     if (!needle) return true;
-    return [d.title, d.doc_number, d.latest?.file_name, d.project?.name, d.project?.code, d.issuing_party, d.description, ...(d.tags ?? [])]
+    return [
+      d.title,
+      d.doc_number,
+      d.latest?.file_name,
+      d.project?.name,
+      d.project?.code,
+      d.issuing_party,
+      d.description,
+      ...(d.tags ?? []),
+    ]
       .join(" ")
       .toLowerCase()
       .includes(needle);
   });
-  const filtered = !!(search.q || search.type || search.project || search.discipline || search.status);
+  const filtered = !!(
+    search.q ||
+    search.type ||
+    search.project ||
+    search.discipline ||
+    search.status
+  );
 
   return (
     <div>
-      <PageHeader title={tx("معرض ملفات المشروعات", "Project files gallery")} subtitle={tx("عرض شبكي · تصفية · معاينة", "Grid view · filters · preview")} />
+      <PageHeader
+        title={tx("معرض ملفات المشروعات", "Project files gallery")}
+        subtitle={tx("عرض شبكي · تصفية · معاينة", "Grid view · filters · preview")}
+      />
 
       <div className="flex flex-wrap gap-2 mb-4">
         <button
@@ -75,10 +93,17 @@ export default function GalleryPage() {
             className={`${inputCls} ps-9`}
             defaultValue={search.q ?? ""}
             onChange={(e) => set({ q: e.target.value })}
-            placeholder={tx("ابحث باسم الملف أو المشروع أو رقم المستند أو البيانات الوصفية", "Search file, project, number or metadata")}
+            placeholder={tx(
+              "ابحث باسم الملف أو المشروع أو رقم المستند أو البيانات الوصفية",
+              "Search file, project, number or metadata",
+            )}
           />
         </div>
-        <select className={`${selectCls} w-auto`} value={search.project ?? ""} onChange={(e) => set({ project: e.target.value })}>
+        <select
+          className={`${selectCls} w-auto`}
+          value={search.project ?? ""}
+          onChange={(e) => set({ project: e.target.value })}
+        >
           <option value="">{tx("كل المشروعات", "All projects")}</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
@@ -86,7 +111,11 @@ export default function GalleryPage() {
             </option>
           ))}
         </select>
-        <select className={`${selectCls} w-auto`} value={search.discipline ?? ""} onChange={(e) => set({ discipline: e.target.value })}>
+        <select
+          className={`${selectCls} w-auto`}
+          value={search.discipline ?? ""}
+          onChange={(e) => set({ discipline: e.target.value })}
+        >
           <option value="">{tx("كل التخصصات", "All disciplines")}</option>
           {DISCIPLINES.map((d) => (
             <option key={d.id} value={d.id}>
@@ -94,7 +123,11 @@ export default function GalleryPage() {
             </option>
           ))}
         </select>
-        <select className={`${selectCls} w-auto`} value={search.status ?? ""} onChange={(e) => set({ status: e.target.value })}>
+        <select
+          className={`${selectCls} w-auto`}
+          value={search.status ?? ""}
+          onChange={(e) => set({ status: e.target.value })}
+        >
           <option value="">{tx("كل الحالات", "All statuses")}</option>
           {DOC_STATUSES.map((d) => (
             <option key={d.id} value={d.id}>
@@ -102,7 +135,10 @@ export default function GalleryPage() {
             </option>
           ))}
         </select>
-        <ViewToggle view={search.view ?? "grid"} onChange={(v) => set({ view: v === "list" ? "list" : undefined })} />
+        <ViewToggle
+          view={search.view ?? "grid"}
+          onChange={(v) => set({ view: v === "list" ? "list" : undefined })}
+        />
         {filtered && (
           <button
             onClick={() => navigate({ search: {}, replace: true })}
@@ -121,7 +157,14 @@ export default function GalleryPage() {
           <DocumentsView docs={list} view={search.view ?? "grid"} />
         </>
       ) : (
-        <EmptyState icon={<Images className="w-6 h-6" />} title={filtered ? tx("لا توجد ملفات مطابقة", "No matching files") : tx("المعرض فارغ", "The gallery is empty")} />
+        <EmptyState
+          icon={<Images className="w-6 h-6" />}
+          title={
+            filtered
+              ? tx("لا توجد ملفات مطابقة", "No matching files")
+              : tx("المعرض فارغ", "The gallery is empty")
+          }
+        />
       )}
     </div>
   );

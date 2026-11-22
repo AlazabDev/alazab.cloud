@@ -4,7 +4,11 @@ import { privateHead } from "@/lib/seo";
 import { approvalsQuery, documentsQuery, projectsQuery } from "@/lib/files/queries";
 
 export const Route = createFileRoute("/_authenticated/files/")({
-  head: () => privateHead("الرئيسية", "نظرة عامة على ملفات ومشروعات العزب: أحدث الملفات والاعتمادات المعلقة."),
+  head: () =>
+    privateHead(
+      "الرئيسية",
+      "نظرة عامة على ملفات ومشروعات العزب: أحدث الملفات والاعتمادات المعلقة.",
+    ),
   loader: ({ context: { queryClient } }) =>
     Promise.all([
       queryClient.ensureQueryData(projectsQuery()),
